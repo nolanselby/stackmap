@@ -1,0 +1,40 @@
+{
+  "name": "@roadmapper/web",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "next": "14.2.20",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "ai": "^4.0.0",
+    "@ai-sdk/openai": "^1.0.0",
+    "nanoid": "^5.0.0",
+    "@supabase/supabase-js": "^2.46.0",
+    "inngest": "^3.22.0",
+    "@inngest/middleware-encryption": "^1.0.0",
+    "@xyflow/react": "^12.0.0",
+    "@roadmapper/db": "workspace:*",
+    "@roadmapper/schemas": "workspace:*",
+    "@roadmapper/scoring": "workspace:*",
+    "@roadmapper/prompts": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0",
+    "vitest": "^2.1.0",
+    "@vitejs/plugin-react": "^4.3.0"
+  }
+}
