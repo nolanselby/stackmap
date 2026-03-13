@@ -3,6 +3,7 @@ import { useMemo } from "react"
 import {
   ReactFlow,
   Background,
+  BackgroundVariant,
   Controls,
   MiniMap,
   type Edge,
@@ -11,12 +12,12 @@ import "@xyflow/react/dist/style.css"
 import { RoadmapNode, type RoadmapNodeType, type RoadmapNodeData } from "./RoadmapNode"
 import type { RoadmapResult } from "@roadmapper/schemas"
 
-const NODE_WIDTH = 260
-const NODE_HEIGHT = 140
-const H_GAP = 60
-const V_GAP = 80
+const NODE_WIDTH = 272
+const NODE_HEIGHT = 168
+const H_GAP = 88
+const V_GAP = 72
 
-// nodeTypes must be defined outside component to avoid re-renders
+// Must be defined outside component to avoid re-renders
 const nodeTypes = { roadmapNode: RoadmapNode }
 
 interface RoadmapGraphProps {
@@ -29,7 +30,6 @@ export function RoadmapGraph({ roadmap, variant, budgetMonthly }: RoadmapGraphPr
   const { nodes, edges } = useMemo(() => {
     const sorted = [...roadmap.workflow_stages].sort((a, b) => a.stage_order - b.stage_order)
 
-    // Simple linear layout — top to bottom, 2 columns when > 6 stages
     const useColumns = sorted.length > 6
     const colCount = useColumns ? 2 : 1
 
@@ -52,7 +52,11 @@ export function RoadmapGraph({ roadmap, variant, budgetMonthly }: RoadmapGraphPr
       source: `stage-${stage.stage_order}`,
       target: `stage-${sorted[i + 1].stage_order}`,
       type: "smoothstep",
-      style: { stroke: "#f97316", strokeWidth: 2 },
+      style: {
+        stroke: "rgb(242,98,34)",
+        strokeWidth: 2,
+        strokeOpacity: 0.5,
+      },
       animated: false,
     }))
 
@@ -60,22 +64,53 @@ export function RoadmapGraph({ roadmap, variant, budgetMonthly }: RoadmapGraphPr
   }, [roadmap, variant, budgetMonthly])
 
   return (
-    <div className="w-full h-full rounded-xl overflow-hidden border border-orange-100">
+    <div
+      className="w-full h-full rounded-3xl overflow-hidden"
+      style={{
+        border: "1px solid rgba(var(--line), 0.6)",
+        boxShadow: "0 1px 3px rgba(20,12,4,0.04), 0 4px 16px rgba(20,12,4,0.06)",
+      }}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
         fitView
-        fitViewOptions={{ padding: 0.2 }}
-        minZoom={0.3}
+        fitViewOptions={{ padding: 0.22 }}
+        minZoom={0.15}
+        maxZoom={1.6}
         proOptions={{ hideAttribution: true }}
+        style={{
+          background: "linear-gradient(160deg, rgba(255,255,255,0.55) 0%, rgba(250,244,233,0.65) 100%)",
+        }}
       >
-        <Background color="#fed7aa" gap={20} />
-        <Controls className="!border-orange-200 !bg-white" />
+        <Background
+          variant={BackgroundVariant.Dots}
+          color="rgba(242,98,34,0.22)"
+          gap={24}
+          size={1.4}
+        />
+        <Controls
+          showInteractive={false}
+          className="!shadow-none"
+          style={{ bottom: 16, right: 16, left: "auto" }}
+        />
         <MiniMap
-          nodeColor="#f97316"
-          maskColor="rgba(255, 247, 237, 0.7)"
-          className="!border-orange-200"
+          nodeColor={(node) => {
+            const nodeData = node.data as RoadmapNodeData
+            if (
+              nodeData?.budgetMonthly < 1000 &&
+              nodeData?.stage?.monthly_cost_estimate > nodeData?.budgetMonthly
+            ) {
+              return "#d1d5db"
+            }
+            return "#f97316"
+          }}
+          maskColor="rgba(250,247,242,0.75)"
+          style={{
+            background: "rgba(255,255,255,0.85)",
+            borderRadius: "12px",
+          }}
         />
       </ReactFlow>
     </div>

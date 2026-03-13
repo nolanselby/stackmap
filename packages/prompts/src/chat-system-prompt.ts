@@ -18,6 +18,8 @@ Then IMMEDIATELY emit a data signal (do not include any other text after that la
 - If the user provides incomplete info, make a reasonable assumption and proceed rather than asking again
 - Do not mention tools, tech stacks, or recommendations during the conversation — save it all for the roadmap
 - Maximum 6 messages total before forcing generation with best-effort interpretation of inputs
+
+When you have collected all four inputs (idea, customer, budget, tech level + preference), call the 'submit_inputs' tool with the collected values. Do not include any JSON in your text response — use only the tool call.
 `
 
 export const CHAT_INPUTS_COMPLETE_SIGNAL = "inputs_complete"
