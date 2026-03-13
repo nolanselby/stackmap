@@ -76,7 +76,7 @@ AI Tool Roadmapper is an open-source tool that helps founders and developers dis
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/nolanselby/ai-tool-roadmapper.git
+git clone https://github.com/nolanselby/stackmap.git
 cd ai-tool-roadmapper
 ```
 
