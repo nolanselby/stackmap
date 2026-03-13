@@ -58,11 +58,11 @@ This project follows the [Contributor Covenant Code of Conduct](https://www.cont
 
 ```bash
 # 1. Fork the repository on GitHub, then clone your fork
-git clone https://github.com/<your-username>/ai-tool-roadmapper.git
-cd ai-tool-roadmapper
+git clone https://github.com/nolanselby/stackmap.git
+cd stackmap
 
 # 2. Add the upstream remote so you can pull future changes
-git remote add upstream https://github.com/your-org/ai-tool-roadmapper.git
+git remote add upstream https://github.com/nolanselby/stackmap.git
 
 # 3. Install all workspace dependencies
 pnpm install
