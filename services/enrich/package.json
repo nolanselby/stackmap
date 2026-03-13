@@ -1,0 +1,23 @@
+{
+  "name": "@roadmapper/enrich",
+  "version": "0.0.1",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@roadmapper/db": "workspace:*",
+    "@roadmapper/schemas": "workspace:*",
+    "@roadmapper/scoring": "workspace:*",
+    "@roadmapper/prompts": "workspace:*",
+    "cheerio": "^1.0.0",
+    "openai": "^4.70.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.0",
+    "typescript": "^5.7.0"
+  }
+}
