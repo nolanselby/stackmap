@@ -27,6 +27,17 @@
     --accent: 242 98 34;
     --accent-2: 192 73 15;
 
+    /* Figma-inspired Palette */
+    --figma-bg: 28 28 28;
+    --figma-surface: 44 44 44;
+    --figma-border: 62 62 62;
+    --figma-text: 255 255 255;
+    --figma-text-muted: 170 170 170;
+    --figma-blue: 13 153 255;
+    --figma-purple: 187 107 217;
+    --figma-toolbar: 34 34 34;
+    --figma-canvas: 18 18 18;
+
     /* Semantic */
     --success: 22 163 74;
     --warning: 202 138 4;

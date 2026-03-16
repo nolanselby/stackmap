@@ -1,6 +1,6 @@
 "use client"
 import { useChat } from "ai/react"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { ChatMessage } from "./ChatMessage"
 import { ChatInput } from "./ChatInput"
@@ -12,8 +12,9 @@ export function ChatInterface() {
   const router = useRouter()
   const bottomRef = useRef<HTMLDivElement>(null)
   const hasTriggeredRef = useRef(false)
+  const [generationError, setGenerationError] = useState(false)
 
-  const { messages, append, isLoading } = useChat({
+  const { messages, append, isLoading, error } = useChat({
     api: "/api/chat",
     initialMessages: [
       { id: "init", role: "assistant", content: INITIAL_MESSAGE },
@@ -32,13 +33,18 @@ export function ChatInterface() {
     }).toolInvocations
     if (!toolInvocations) return
 
+    // We look for 'result' (if handled) or 'call' (if streaming/finished but no result yet)
     const submitCall = toolInvocations.find(
-      (t) => t.toolName === "submit_inputs" && t.state === "result"
+      (t) => t.toolName === "submit_inputs" && (t.state === "result" || t.state === "call")
     )
+
     if (!submitCall) return
 
-    hasTriggeredRef.current = true
+    // Only trigger if we have the critical 'idea' argument (heuristic for 'ready')
     const args = submitCall.args
+    if (!args.idea) return
+
+    hasTriggeredRef.current = true
 
     fetch("/api/roadmap/generate", {
       method: "POST",
@@ -51,11 +57,23 @@ export function ChatInterface() {
         preference: args.preference,
       }),
     })
-      .then((r) => r.json())
-      .then(({ short_id }) => {
-        if (short_id) router.push(`/r/${short_id}`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
       })
-      .catch(console.error)
+      .then(({ short_id }) => {
+        if (short_id) {
+          // Add a slight delay for dramatic effect/feedback
+          setTimeout(() => router.push(`/r/${short_id}`), 800)
+        } else {
+          setGenerationError(true)
+        }
+      })
+      .catch((err) => {
+        console.error("Roadmap generation error:", err)
+        setGenerationError(true)
+        hasTriggeredRef.current = false // allow retry
+      })
   }, [messages, router])
 
   // Scroll to bottom on new messages
@@ -67,7 +85,8 @@ export function ChatInterface() {
     append({ role: "user", content: text })
   }
 
-  const isComplete = hasTriggeredRef.current
+  const isGenerating = hasTriggeredRef.current && !generationError
+  const isComplete = isGenerating
 
   return (
     <div className="flex flex-col" style={{ minHeight: "420px", maxHeight: "580px" }}>
@@ -154,6 +173,24 @@ export function ChatInterface() {
           </div>
         )}
 
+        {/* Error display */}
+        {(error || generationError) && (
+          <div className="flex justify-center py-2 animate-slide-up">
+            <div
+              className="text-[12px] px-4 py-2 rounded-full"
+              style={{
+                background: "rgba(220,38,38,0.06)",
+                border: "1px solid rgba(220,38,38,0.2)",
+                color: "rgb(185,28,28)",
+              }}
+            >
+              {generationError
+                ? "Roadmap generation failed. Please try again."
+                : "Something went wrong. Please try again."}
+            </div>
+          </div>
+        )}
+
         {/* Generating transition */}
         {isComplete && (
           <div className="flex justify-center py-2 animate-slide-up">
@@ -186,13 +223,51 @@ export function ChatInterface() {
 
       {/* Input area */}
       <div
-        className="flex-shrink-0 px-4 pb-4 pt-3"
+        className="flex-shrink-0 px-4 pb-4 pt-3 space-y-3"
         style={{ borderTop: "1px solid rgb(var(--line))" }}
       >
+        {/* Magic Generate Button — shows when we have at least the idea */}
+        {messages.length >= 2 && !isGenerating && !isLoading && (
+          <div className="flex justify-center animate-slide-up">
+            <button
+              onClick={() => {
+                // Heuristic: collection of info from messages
+                const args = {
+                   idea: messages[1]?.content || "AI Startup",
+                   customer: messages[2]?.content || "Early adopters",
+                   budget_monthly: 100,
+                   tech_level: "some-coding",
+                   preference: "best-overall"
+                }
+                hasTriggeredRef.current = true
+                setGenerationError(false)
+                fetch("/api/roadmap/generate", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(args),
+                })
+                  .then(r => r.json())
+                  .then(({ short_id }) => {
+                    if (short_id) router.push(`/r/${short_id}`)
+                    else setGenerationError(true)
+                  })
+              }}
+              className="flex items-center gap-2 px-6 py-2.5 rounded-full text-[13px] font-bold text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                background: "linear-gradient(135deg, rgb(242,98,34) 0%, rgb(192,73,15) 100%)",
+                boxShadow: "0 4px 12px rgba(242,98,34,0.3)"
+              }}
+            >
+              <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4"><path d="M8 2l2 4 4 2-4 2-2 4-2-4-4-2 4-2 2-4z" fill="white"/></svg>
+              Generate My Roadmap
+            </button>
+          </div>
+        )}
+
         <ChatInput
           onSubmit={handleSubmit}
-          disabled={isLoading || isComplete}
-          placeholder={isComplete ? "Generating your roadmap…" : "Type your answer…"}
+          disabled={isLoading || isGenerating}
+          placeholder={isGenerating ? "Generating your roadmap…" : "Type your answer…"}
         />
       </div>
     </div>

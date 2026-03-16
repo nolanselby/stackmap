@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server"
 import { createServerClient } from "@roadmapper/db"
 import { RoadmapInputSchema } from "@roadmapper/schemas"
-import { inngest } from "@/inngest/client"
+import { detectBusinessType, retrieveCandidates, generateRoadmap } from "@roadmapper/planner"
 import { nanoid } from "nanoid"
 
-const NANOID_LENGTH = 8
+// Allow up to 60s for the planner to complete (Vercel Pro; ignored locally)
+export const maxDuration = 60
 
-function generateShortId() {
-  return nanoid(NANOID_LENGTH)
-}
+const NANOID_LENGTH = 8
 
 export async function POST(request: Request) {
   let body: unknown
@@ -29,31 +28,9 @@ export async function POST(request: Request) {
 
   const input = parsed.data
   const db = createServerClient()
+  const shortId = nanoid(NANOID_LENGTH)
 
-  // Generate short_id with collision retry
-  let shortId: string | null = null
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const candidate = generateShortId()
-    const { data: existing } = await db
-      .from("roadmaps")
-      .select("id")
-      .eq("short_id", candidate)
-      .maybeSingle()
-
-    if (!existing) {
-      shortId = candidate
-      break
-    }
-  }
-
-  if (!shortId) {
-    return NextResponse.json(
-      { error: "Failed to create roadmap. Please try again." },
-      { status: 500 }
-    )
-  }
-
-  // Insert roadmap record
+  // Create roadmap record
   const { error: insertError } = await db.from("roadmaps").insert({
     short_id: shortId,
     input_idea: input.idea,
@@ -65,17 +42,68 @@ export async function POST(request: Request) {
   })
 
   if (insertError) {
+    console.error("Failed to insert roadmap:", insertError)
     return NextResponse.json(
       { error: "Failed to create roadmap. Please try again." },
       { status: 500 }
     )
   }
 
-  // Trigger Inngest planner function
-  await inngest.send({
-    name: "roadmap/generate",
-    data: { shortId, input },
-  })
+  const anthropicKey = process.env.ANTHROPIC_API_KEY
+  const openaiKey = process.env.OPENAI_API_KEY ?? ""
 
-  return NextResponse.json({ short_id: shortId }, { status: 200 })
+  if (!anthropicKey) {
+    await db.from("roadmaps").update({ status: "failed" }).eq("short_id", shortId)
+    return NextResponse.json(
+      { error: "ANTHROPIC_API_KEY is not configured." },
+      { status: 500 }
+    )
+  }
+
+  try {
+    // Stage 1: Detect business type
+    const { business_type } = await detectBusinessType(
+      input.idea,
+      input.customer ?? "",
+      anthropicKey
+    )
+
+    // Stage 2: Retrieve tool candidates
+    const candidatesByStage = await retrieveCandidates(
+      input.idea,
+      business_type,
+      input.budget_monthly,
+      input.preference,
+      openaiKey
+    )
+
+    // Stage 3: Generate the roadmap
+    const roadmapResult = await generateRoadmap({
+      idea: input.idea,
+      customer: input.customer ?? "",
+      budgetMonthly: input.budget_monthly,
+      techLevel: input.tech_level,
+      preference: input.preference,
+      businessType: business_type,
+      candidatesByStage,
+      apiKey: anthropicKey,
+    })
+
+    // Save result
+    const { error: updateError } = await db
+      .from("roadmaps")
+      .update({ result_json: roadmapResult, status: "complete" })
+      .eq("short_id", shortId)
+
+    if (updateError) throw new Error(`Failed to save result: ${updateError.message}`)
+
+    return NextResponse.json({ short_id: shortId }, { status: 200 })
+  } catch (err) {
+    console.error("Roadmap generation error:", err)
+    await db.from("roadmaps").update({ status: "failed" }).eq("short_id", shortId)
+    return NextResponse.json(
+      { error: "Generation failed. Please try again." },
+      { status: 500 }
+    )
+  }
 }

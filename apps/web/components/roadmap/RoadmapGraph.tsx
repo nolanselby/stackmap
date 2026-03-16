@@ -24,9 +24,11 @@ interface RoadmapGraphProps {
   roadmap: RoadmapResult
   variant: "best-overall" | "cheapest" | "open-source"
   budgetMonthly: number
+  onNodeClick?: (id: string) => void
+  selectedId?: string | null
 }
 
-export function RoadmapGraph({ roadmap, variant, budgetMonthly }: RoadmapGraphProps) {
+export function RoadmapGraph({ roadmap, variant, budgetMonthly, onNodeClick, selectedId }: RoadmapGraphProps) {
   const { nodes, edges } = useMemo(() => {
     const sorted = [...roadmap.workflow_stages].sort((a, b) => a.stage_order - b.stage_order)
 
@@ -36,14 +38,16 @@ export function RoadmapGraph({ roadmap, variant, budgetMonthly }: RoadmapGraphPr
     const nodes: RoadmapNodeType[] = sorted.map((stage, i) => {
       const col = useColumns ? i % colCount : 0
       const row = useColumns ? Math.floor(i / colCount) : i
+      const id = `stage-${stage.stage_order}`
       return {
-        id: `stage-${stage.stage_order}`,
+        id,
         type: "roadmapNode",
         position: {
           x: col * (NODE_WIDTH + H_GAP),
           y: row * (NODE_HEIGHT + V_GAP),
         },
         data: { stage, variant, budgetMonthly } satisfies RoadmapNodeData,
+        selected: id === selectedId,
       }
     })
 
@@ -52,65 +56,43 @@ export function RoadmapGraph({ roadmap, variant, budgetMonthly }: RoadmapGraphPr
       source: `stage-${stage.stage_order}`,
       target: `stage-${sorted[i + 1].stage_order}`,
       type: "smoothstep",
+      interactionWidth: 0,
       style: {
-        stroke: "rgb(242,98,34)",
+        stroke: "rgba(255,255,255,0.15)",
         strokeWidth: 2,
-        strokeOpacity: 0.5,
       },
       animated: false,
     }))
 
     return { nodes, edges }
-  }, [roadmap, variant, budgetMonthly])
+  }, [roadmap, variant, budgetMonthly, selectedId])
 
   return (
-    <div
-      className="w-full h-full rounded-3xl overflow-hidden"
-      style={{
-        border: "1px solid rgba(var(--line), 0.6)",
-        boxShadow: "0 1px 3px rgba(20,12,4,0.04), 0 4px 16px rgba(20,12,4,0.06)",
-      }}
-    >
+    <div className="w-full h-full">
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
         fitView
         fitViewOptions={{ padding: 0.22 }}
+        onNodeClick={(_, node) => onNodeClick?.(node.id)}
         minZoom={0.15}
         maxZoom={1.6}
         proOptions={{ hideAttribution: true }}
         style={{
-          background: "linear-gradient(160deg, rgba(255,255,255,0.55) 0%, rgba(250,244,233,0.65) 100%)",
+          background: "rgb(var(--figma-canvas))",
         }}
       >
         <Background
           variant={BackgroundVariant.Dots}
-          color="rgba(242,98,34,0.22)"
+          color="rgba(255,255,255,0.08)"
           gap={24}
-          size={1.4}
+          size={1}
         />
         <Controls
           showInteractive={false}
-          className="!shadow-none"
+          className="!shadow-none !border-white/10 !bg-white/5"
           style={{ bottom: 16, right: 16, left: "auto" }}
-        />
-        <MiniMap
-          nodeColor={(node) => {
-            const nodeData = node.data as RoadmapNodeData
-            if (
-              nodeData?.budgetMonthly < 1000 &&
-              nodeData?.stage?.monthly_cost_estimate > nodeData?.budgetMonthly
-            ) {
-              return "#d1d5db"
-            }
-            return "#f97316"
-          }}
-          maskColor="rgba(250,247,242,0.75)"
-          style={{
-            background: "rgba(255,255,255,0.85)",
-            borderRadius: "12px",
-          }}
         />
       </ReactFlow>
     </div>

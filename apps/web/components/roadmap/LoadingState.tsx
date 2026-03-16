@@ -67,8 +67,8 @@ export function LoadingState() {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden"
-      style={{ background: "rgb(var(--paper))" }}
+      className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden text-white"
+      style={{ background: "rgb(var(--figma-bg))" }}
     >
       {/* Ambient background */}
       <div
@@ -76,7 +76,7 @@ export function LoadingState() {
         className="absolute inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 800px 600px at 50% 40%, rgba(242,98,34,0.07) 0%, transparent 60%)",
+            "radial-gradient(ellipse 800px 600px at 50% 40%, rgba(var(--figma-blue), 0.1) 0%, transparent 60%)",
         }}
       />
 
@@ -125,23 +125,22 @@ export function LoadingState() {
         {/* Heading */}
         <div className="text-center mb-8">
           <h2
-            className="display text-2xl mb-1.5"
-            style={{ color: "rgb(var(--ink))" }}
+            className="display text-2xl mb-1.5 text-white"
           >
             Building your roadmap
           </h2>
-          <p className="text-sm" style={{ color: "rgb(var(--muted))" }}>
+          <p className="text-sm text-white/40">
             This usually takes 20–40 seconds
           </p>
         </div>
 
         {/* Steps */}
         <div
-          className="grain rounded-2xl p-5 space-y-3 mb-8"
+          className="rounded-2xl p-5 space-y-3 mb-8"
           style={{
-            background: "rgba(255,255,255,0.6)",
-            border: "1px solid rgba(var(--line), 0.7)",
-            boxShadow: "0 2px 8px rgba(20,12,4,0.06), 0 8px 24px rgba(20,12,4,0.07)",
+            background: "rgba(255,255,255,0.03)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
           }}
         >
           {STEPS.map((step, i) => {
@@ -228,8 +227,8 @@ export function LoadingState() {
         <div
           className="rounded-2xl p-4 overflow-hidden"
           style={{
-            background: "rgba(255,255,255,0.4)",
-            border: "1px solid rgba(var(--line), 0.5)",
+            background: "rgba(255,255,255,0.02)",
+            border: "1px solid rgba(255,255,255,0.05)",
           }}
         >
           <div className="skeleton rounded mb-3" style={{ height: 10, width: "40%" }} />

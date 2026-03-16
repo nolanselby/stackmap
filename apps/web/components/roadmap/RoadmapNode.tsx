@@ -44,8 +44,7 @@ function Badge({ level, label }: { level: string; label: string }) {
   )
 }
 
-function RoadmapNodeComponent({ data }: NodeProps<RoadmapNodeType>) {
-  const [expanded, setExpanded] = useState(false)
+function RoadmapNodeComponent({ data, selected }: NodeProps<RoadmapNodeType>) {
   const { stage, variant, budgetMonthly } = data
 
   const tool =
@@ -58,259 +57,49 @@ function RoadmapNodeComponent({ data }: NodeProps<RoadmapNodeType>) {
   const isOverBudget =
     budgetMonthly < 1000 && stage.monthly_cost_estimate > budgetMonthly
 
-  const hasAlternatives =
-    (stage.cheapest_tool && variant !== "cheapest") ||
-    (stage.opensource_tool && variant !== "open-source")
-
   return (
-    <>
+    <div className="group">
       <Handle
         type="target"
         position={Position.Top}
-        style={{
-          background: "rgb(var(--accent))",
-          border: "2px solid white",
-          width: 8,
-          height: 8,
-        }}
+        className="!w-2 !h-2 !bg-[rgb(var(--figma-blue))] !border-2 !border-[rgb(var(--figma-canvas))] !opacity-0 group-hover:!opacity-100 transition-opacity"
       />
 
       <div
-        onClick={() => setExpanded(!expanded)}
         className={cn(
-          "cursor-pointer transition-all duration-150 ease-out w-[268px]",
-          isOverBudget && "opacity-50"
+          "w-[240px] px-3 py-2.5 transition-all duration-200",
+          selected ? "ring-2 ring-[rgb(var(--figma-blue))] ring-offset-2 ring-offset-[rgb(var(--figma-canvas))]" : "border border-white/10 hover:border-white/25",
+          isOverBudget && "opacity-60"
         )}
         style={{
-          background: "rgb(var(--paper-3))",
-          border: expanded
-            ? "1px solid rgba(var(--accent), 0.45)"
-            : "1px solid rgb(var(--line))",
-          borderRadius: "12px",
-          boxShadow: expanded
-            ? "0 0 0 3px rgba(var(--accent), 0.06), 0 4px 16px rgba(0,0,0,0.08)"
-            : "0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04)",
-        }}
-        onMouseEnter={(e) => {
-          if (!expanded) {
-            (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(var(--accent), 0.3)"
-            ;(e.currentTarget as HTMLDivElement).style.boxShadow = "0 2px 8px rgba(0,0,0,0.08), 0 6px 20px rgba(0,0,0,0.06)"
-            ;(e.currentTarget as HTMLDivElement).style.transform = "translateY(-1px)"
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (!expanded) {
-            (e.currentTarget as HTMLDivElement).style.borderColor = "rgb(var(--line))"
-            ;(e.currentTarget as HTMLDivElement).style.boxShadow = "0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04)"
-            ;(e.currentTarget as HTMLDivElement).style.transform = "translateY(0)"
-          }
+          background: "rgb(var(--figma-surface))",
+          borderRadius: "6px",
+          boxShadow: selected ? "0 0 0 1px rgb(var(--figma-blue))" : "0 4px 12px rgba(0,0,0,0.5)",
         }}
       >
-        {/* Orange top accent stripe */}
-        <div
-          style={{
-            height: "3px",
-            background: isOverBudget
-              ? "rgb(var(--line))"
-              : "rgb(var(--accent))",
-            borderRadius: "12px 12px 0 0",
-          }}
-        />
-
-        {/* Card body */}
-        <div className="px-4 pt-3.5 pb-3">
-          {/* Header row */}
-          <div className="flex items-start justify-between gap-2 mb-2.5">
-            <div className="flex items-center gap-2 min-w-0">
-              {/* Stage number */}
-              <div
-                className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                style={{
-                  background: isOverBudget ? "rgb(var(--line))" : "rgb(var(--accent))",
-                }}
-              >
-                <span className="text-white text-[9px] font-bold leading-none">
-                  {stage.stage_order}
-                </span>
-              </div>
-              <span
-                className="text-[10px] font-semibold uppercase tracking-[0.14em] truncate"
-                style={{ color: "rgb(var(--muted))" }}
-              >
-                {stage.stage_name}
-              </span>
-            </div>
-
-            {/* Cost pill */}
-            <div
-              className="flex items-baseline gap-0.5 rounded-full px-2 py-0.5 flex-shrink-0"
-              style={
-                isOverBudget
-                  ? { background: "rgb(var(--line-2))", border: "1px solid rgb(var(--line))" }
-                  : { background: "rgba(var(--accent), 0.08)", border: "1px solid rgba(var(--accent), 0.16)" }
-              }
-            >
-              <span
-                className="text-[11px] font-bold tabular-nums"
-                style={{
-                  color: isOverBudget ? "rgb(var(--muted-2))" : "rgb(var(--accent-2))",
-                  textDecoration: isOverBudget ? "line-through" : "none",
-                }}
-              >
-                ${stage.monthly_cost_estimate}
-              </span>
-              <span
-                className="text-[9px]"
-                style={{ color: "rgb(var(--muted-2))" }}
-              >
-                /mo
-              </span>
-            </div>
-          </div>
-
-          {/* Tool name + description */}
-          <div className="mb-3">
-            <p
-              className="font-semibold text-[14px] leading-snug"
-              style={{ color: "rgb(var(--ink))" }}
-            >
-              {tool.name}
-            </p>
-            {tool.why && (
-              <p
-                className="text-[12px] mt-1 leading-relaxed line-clamp-2"
-                style={{ color: "rgb(var(--muted))" }}
-              >
-                {tool.why}
-              </p>
-            )}
-          </div>
-
-          {/* Badges */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <Badge level={stage.setup_difficulty} label={`${stage.setup_difficulty} setup`} />
-            <Badge level={stage.lock_in_risk} label={`${stage.lock_in_risk} lock-in`} />
-            {isOverBudget && (
-              <span
-                className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium"
-                style={{
-                  background: "rgba(220,38,38,0.08)",
-                  color: "rgb(185,28,28)",
-                  border: "1px solid rgba(220,38,38,0.18)",
-                }}
-              >
-                Over budget
-              </span>
-            )}
-          </div>
-
-          {/* Expand toggle */}
-          {(hasAlternatives || stage.why_chosen) && (
-            <div
-              className="flex items-center justify-center mt-3 pt-3"
-              style={{ borderTop: "1px solid rgb(var(--line))" }}
-            >
-              <div
-                className="flex items-center gap-1 text-[11px]"
-                style={{ color: "rgb(var(--muted))" }}
-              >
-                <span>{expanded ? "Collapse" : "See details & alternatives"}</span>
-                <ChevronIcon open={expanded} />
-              </div>
-            </div>
-          )}
+        <div className="flex items-center justify-between gap-2 mb-2">
+           <div className="flex items-center gap-1.5 min-w-0">
+              <div className="w-1.5 h-1.5 rounded-full bg-[rgb(var(--figma-purple))]" />
+              <span className="text-[10px] font-bold text-white/40 uppercase tracking-tight truncate">Stage {stage.stage_order}</span>
+           </div>
+           {isOverBudget && (
+             <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+           )}
         </div>
 
-        {/* Expanded panel */}
-        {expanded && (
-          <div
-            className="px-4 pb-4 pt-3 space-y-3"
-            style={{ borderTop: "1px solid rgb(var(--line))" }}
-          >
-            {/* Why chosen */}
-            {stage.why_chosen && (
-              <div>
-                <p
-                  className="text-[9px] font-bold uppercase tracking-[0.18em] mb-1.5"
-                  style={{ color: "rgb(var(--muted-2))" }}
-                >
-                  Why this tool
-                </p>
-                <p
-                  className="text-[12px] leading-relaxed"
-                  style={{ color: "rgb(var(--ink))" }}
-                >
-                  {stage.why_chosen}
-                </p>
-              </div>
-            )}
-
-            {/* Cheaper alternative */}
-            {stage.cheapest_tool && variant !== "cheapest" && (
-              <div
-                className="rounded-lg p-3"
-                style={{
-                  background: "rgba(22,163,74,0.05)",
-                  border: "1px solid rgba(22,163,74,0.15)",
-                }}
-              >
-                <p
-                  className="text-[9px] font-bold uppercase tracking-[0.15em] mb-1"
-                  style={{ color: "rgb(21,128,61)" }}
-                >
-                  Cheaper option
-                </p>
-                <p className="text-[12px] font-semibold mb-1" style={{ color: "rgb(var(--ink))" }}>
-                  {stage.cheapest_tool.name}
-                </p>
-                {stage.cheapest_tool.why && (
-                  <p className="text-[11px] leading-relaxed" style={{ color: "rgb(var(--muted))" }}>
-                    {stage.cheapest_tool.why}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* Open-source alternative */}
-            {stage.opensource_tool && variant !== "open-source" && (
-              <div
-                className="rounded-lg p-3"
-                style={{
-                  background: "rgba(37,99,235,0.05)",
-                  border: "1px solid rgba(37,99,235,0.12)",
-                }}
-              >
-                <p
-                  className="text-[9px] font-bold uppercase tracking-[0.15em] mb-1"
-                  style={{ color: "rgb(37,99,235)" }}
-                >
-                  Open-source option
-                </p>
-                <p className="text-[12px] font-semibold mb-1" style={{ color: "rgb(var(--ink))" }}>
-                  {stage.opensource_tool.name}
-                </p>
-                {stage.opensource_tool.why && (
-                  <p className="text-[11px] leading-relaxed" style={{ color: "rgb(var(--muted))" }}>
-                    {stage.opensource_tool.why}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+        <h3 className="text-[13px] font-bold text-white/90 leading-tight mb-1 truncate">{stage.stage_name}</h3>
+        <div className="flex items-center gap-2">
+           <span className="text-[11px] text-white/50 font-medium truncate">{tool.name}</span>
+           <span className="ml-auto text-[10px] font-bold text-white/30 truncate">${stage.monthly_cost_estimate}/mo</span>
+        </div>
       </div>
 
       <Handle
         type="source"
         position={Position.Bottom}
-        style={{
-          background: "rgb(var(--accent))",
-          border: "2px solid white",
-          width: 8,
-          height: 8,
-        }}
+        className="!w-2 !h-2 !bg-[rgb(var(--figma-blue))] !border-2 !border-[rgb(var(--figma-canvas))] !opacity-0 group-hover:!opacity-100 transition-opacity"
       />
-    </>
+    </div>
   )
 }
 
