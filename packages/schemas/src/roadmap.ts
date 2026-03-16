@@ -30,7 +30,7 @@ export const RoadmapResultSchema = z.object({
 })
 
 export const RoadmapInputSchema = z.object({
-  idea: z.string().min(10).max(500),
+  idea: z.string().min(2).max(500),
   customer: z.string().max(200).optional(),
   budget_monthly: z.number().nonnegative(),
   tech_level: z.enum(["non-technical", "some-coding", "full-stack"]),

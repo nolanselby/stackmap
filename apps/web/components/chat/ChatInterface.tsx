@@ -13,6 +13,7 @@ export function ChatInterface() {
   const bottomRef = useRef<HTMLDivElement>(null)
   const hasTriggeredRef = useRef(false)
   const [generationError, setGenerationError] = useState(false)
+  const [serverError, setServerError] = useState<string | null>(null)
 
   const { messages, append, isLoading, error } = useChat({
     api: "/api/chat",
@@ -45,6 +46,7 @@ export function ChatInterface() {
     if (!args.idea) return
 
     hasTriggeredRef.current = true
+    setServerError(null)
 
     fetch("/api/roadmap/generate", {
       method: "POST",
@@ -57,13 +59,15 @@ export function ChatInterface() {
         preference: args.preference,
       }),
     })
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+      .then(async (r) => {
+        if (!r.ok) {
+          const body = await r.json().catch(() => ({}))
+          throw new Error(body.error || `HTTP ${r.status}`)
+        }
         return r.json()
       })
       .then(({ short_id }) => {
         if (short_id) {
-          // Add a slight delay for dramatic effect/feedback
           setTimeout(() => router.push(`/r/${short_id}`), 800)
         } else {
           setGenerationError(true)
@@ -72,6 +76,7 @@ export function ChatInterface() {
       .catch((err) => {
         console.error("Roadmap generation error:", err)
         setGenerationError(true)
+        setServerError(err.message)
         hasTriggeredRef.current = false // allow retry
       })
   }, [messages, router])
@@ -175,7 +180,7 @@ export function ChatInterface() {
 
         {/* Error display */}
         {(error || generationError) && (
-          <div className="flex justify-center py-2 animate-slide-up">
+          <div className="flex justify-center py-2 animate-slide-up flex-col items-center">
             <div
               className="text-[12px] px-4 py-2 rounded-full"
               style={{
@@ -188,6 +193,11 @@ export function ChatInterface() {
                 ? "Roadmap generation failed. Please try again."
                 : "Something went wrong. Please try again."}
             </div>
+            {serverError && (
+              <p className="text-[10px] text-red-400 mt-1 font-mono uppercase tracking-tight">
+                Error: {serverError}
+              </p>
+            )}
           </div>
         )}
 
@@ -231,25 +241,41 @@ export function ChatInterface() {
           <div className="flex justify-center animate-slide-up">
             <button
               onClick={() => {
-                // Heuristic: collection of info from messages
+                const userMessages = messages.filter(m => m.role === 'user')
+                const lastIdea = userMessages[userMessages.length - 1]?.content || "Test Idea"
+                
                 const args = {
-                   idea: messages[1]?.content || "AI Startup",
-                   customer: messages[2]?.content || "Early adopters",
+                   idea: lastIdea.length < 2 ? "Test Idea" : lastIdea,
+                   customer: "Early adopters",
                    budget_monthly: 100,
                    tech_level: "some-coding",
                    preference: "best-overall"
                 }
                 hasTriggeredRef.current = true
                 setGenerationError(false)
+                setServerError(null)
+
                 fetch("/api/roadmap/generate", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify(args),
                 })
-                  .then(r => r.json())
+                  .then(async (r) => {
+                    if (!r.ok) {
+                      const body = await r.json().catch(() => ({}))
+                      throw new Error(body.error || `HTTP ${r.status}`)
+                    }
+                    return r.json()
+                  })
                   .then(({ short_id }) => {
                     if (short_id) router.push(`/r/${short_id}`)
                     else setGenerationError(true)
+                  })
+                  .catch((err) => {
+                    console.error("Roadmap generation error:", err)
+                    setGenerationError(true)
+                    setServerError(err.message)
+                    hasTriggeredRef.current = false
                   })
               }}
               className="flex items-center gap-2 px-6 py-2.5 rounded-full text-[13px] font-bold text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
