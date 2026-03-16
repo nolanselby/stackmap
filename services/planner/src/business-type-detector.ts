@@ -26,7 +26,7 @@ export async function detectBusinessType(
   const prompt = buildBusinessTypePrompt(idea, customer)
 
   const response = await client.messages.create({
-    model: "claude-3-5-sonnet-20240620",
+    model: "claude-3-5-sonnet-20241022",
     max_tokens: 100,
     messages: [{ role: "user", content: prompt + "\n\nPlease respond in JSON format." }],
   })
