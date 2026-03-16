@@ -1,17 +1,9 @@
 import type { Metadata } from "next"
-import { Fraunces, IBM_Plex_Sans } from "next/font/google"
+import { Inter } from "next/font/google"
 import "./globals.css"
 
-const display = Fraunces({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
-  preload: true,
-})
-
-const sans = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
   variable: "--font-sans",
   display: "swap",
   preload: true,
@@ -31,7 +23,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${display.variable} ${sans.variable}`}>{children}</body>
+      <body className={inter.variable}>{children}</body>
     </html>
   )
 }

@@ -14,22 +14,22 @@ const RoadmapGraph = dynamic(
     ssr: false,
     loading: () => (
       <div
-        className="w-full h-full grain rounded-3xl flex items-center justify-center"
+        className="w-full h-full rounded-2xl flex items-center justify-center"
         style={{
-          background: "rgba(255,255,255,0.5)",
-          border: "1px solid rgba(var(--line), 0.7)",
+          background: "rgb(var(--paper))",
+          border: "1px solid rgb(var(--line))",
         }}
       >
         <div className="text-center space-y-3">
           <div
-            className="w-8 h-8 rounded-full mx-auto"
+            className="w-7 h-7 rounded-full mx-auto"
             style={{
-              border: "2px solid rgba(242,98,34,0.2)",
-              borderTopColor: "rgb(242,98,34)",
-              animation: "spin-slow 1.6s linear infinite",
+              border: "2px solid rgb(var(--line))",
+              borderTopColor: "rgb(var(--accent))",
+              animation: "spin-slow 1.2s linear infinite",
             }}
           />
-          <span className="text-sm font-medium" style={{ color: "rgb(var(--muted))" }}>
+          <span className="text-sm" style={{ color: "rgb(var(--muted))" }}>
             Loading graph…
           </span>
         </div>
@@ -71,22 +71,17 @@ export function RoadmapView({ roadmap, shortId }: RoadmapViewProps) {
 
       {/* ── Top bar ── */}
       <header
-        className="flex-shrink-0 flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-2.5"
+        className="flex-shrink-0 flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3"
         style={{
-          borderBottom: "1px solid rgba(var(--line), 0.7)",
-          background: "rgba(255,255,255,0.65)",
-          backdropFilter: "blur(12px)",
-          WebkitBackdropFilter: "blur(12px)",
+          borderBottom: "1px solid rgb(var(--line))",
+          background: "rgb(var(--paper-3))",
         }}
       >
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2.5 min-w-0 flex-shrink-0 group" aria-label="Home">
+        <a href="/" className="flex items-center gap-2 min-w-0 flex-shrink-0" aria-label="Home">
           <div
-            className="w-7 h-7 rounded-[8px] flex items-center justify-center"
-            style={{
-              background: "linear-gradient(135deg, rgb(242,98,34) 0%, rgb(192,73,15) 100%)",
-              boxShadow: "0 1px 4px rgba(242,98,34,0.3)",
-            }}
+            className="w-6 h-6 rounded-[7px] flex items-center justify-center"
+            style={{ background: "rgb(var(--accent))" }}
           >
             <svg viewBox="0 0 20 20" fill="none" className="w-3.5 h-3.5" aria-hidden="true">
               <path d="M10 2L3 6v8l7 4 7-4V6L10 2z" fill="white" fillOpacity="0.95" />
@@ -97,7 +92,7 @@ export function RoadmapView({ roadmap, shortId }: RoadmapViewProps) {
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 min-w-0">
           <span
-            className="text-[12px] font-medium hidden sm:inline"
+            className="text-[12px] hidden sm:inline"
             style={{ color: "rgb(var(--muted-2))" }}
           >
             Roadmaps
@@ -106,7 +101,7 @@ export function RoadmapView({ roadmap, shortId }: RoadmapViewProps) {
             <path d="M6 4l4 4-4 4" stroke="rgb(var(--muted-2))" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <h1
-            className="display text-[14px] sm:text-[15px] leading-none truncate"
+            className="font-semibold text-[14px] sm:text-[15px] leading-none truncate"
             style={{ color: "rgb(var(--ink))" }}
           >
             {businessLabel}
@@ -117,10 +112,10 @@ export function RoadmapView({ roadmap, shortId }: RoadmapViewProps) {
 
         {/* Cost badge */}
         <div
-          className="grain flex items-baseline gap-1 rounded-full px-3 py-1.5 flex-shrink-0"
+          className="flex items-baseline gap-0.5 rounded-full px-3 py-1 flex-shrink-0"
           style={{
-            background: "rgba(242,98,34,0.08)",
-            border: "1px solid rgba(242,98,34,0.2)",
+            background: "rgba(var(--accent), 0.08)",
+            border: "1px solid rgba(var(--accent), 0.18)",
           }}
         >
           <span
@@ -129,7 +124,7 @@ export function RoadmapView({ roadmap, shortId }: RoadmapViewProps) {
           >
             ${totalCost}
           </span>
-          <span className="text-[11px] font-medium" style={{ color: "rgb(var(--muted))" }}>
+          <span className="text-[11px]" style={{ color: "rgb(var(--muted))" }}>
             /mo
           </span>
         </div>
@@ -137,15 +132,11 @@ export function RoadmapView({ roadmap, shortId }: RoadmapViewProps) {
         {/* Share button */}
         <button
           onClick={handleShareCopy}
-          className="grain flex items-center gap-1.5 px-3 py-1.5 rounded-xl transition-all duration-150 hover:brightness-[0.97] active:scale-[0.98]"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors duration-150 hover:bg-[rgb(var(--line-2))]"
           style={{
-            background: copied
-              ? "rgba(22,163,74,0.08)"
-              : "rgba(255,255,255,0.7)",
-            border: copied
-              ? "1px solid rgba(22,163,74,0.3)"
-              : "1px solid rgba(var(--line), 0.8)",
-            color: copied ? "rgb(21,128,61)" : "rgb(var(--ink))",
+            border: "1px solid rgb(var(--line))",
+            color: copied ? "rgb(22,163,74)" : "rgb(var(--ink))",
+            background: copied ? "rgba(22,163,74,0.05)" : "transparent",
           }}
         >
           {copied ? (
@@ -156,7 +147,7 @@ export function RoadmapView({ roadmap, shortId }: RoadmapViewProps) {
           ) : (
             <>
               <Share2 className="h-3.5 w-3.5" style={{ color: "rgb(var(--muted))" }} />
-              <span className="text-[12px] font-medium hidden sm:inline" style={{ color: "rgb(var(--ink))" }}>Share</span>
+              <span className="text-[12px] font-medium hidden sm:inline">Share</span>
             </>
           )}
         </button>

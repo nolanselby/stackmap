@@ -25,17 +25,14 @@ export function ChatMessage({ role, content, index = 0 }: ChatMessageProps) {
 
   return (
     <div
-      className={cn("flex w-full items-end gap-2.5 animate-slide-up", isUser ? "justify-end" : "justify-start")}
-      style={{ animationDelay: `${index * 35}ms`, animationFillMode: "both" }}
+      className={cn("flex w-full items-end gap-2 animate-slide-up", isUser ? "justify-end" : "justify-start")}
+      style={{ animationDelay: `${index * 30}ms`, animationFillMode: "both" }}
     >
       {/* Avatar — assistant only */}
       {!isUser && (
         <div
           className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mb-0.5 text-[9px] font-bold text-white"
-          style={{
-            background: "linear-gradient(135deg, rgb(242,98,34) 0%, rgb(192,73,15) 100%)",
-            boxShadow: "0 1px 4px rgba(242,98,34,0.3)",
-          }}
+          style={{ background: "rgb(var(--accent))" }}
           aria-hidden="true"
         >
           AI
@@ -43,22 +40,20 @@ export function ChatMessage({ role, content, index = 0 }: ChatMessageProps) {
       )}
 
       <div
-        className={cn("max-w-[82%] text-sm leading-relaxed", isUser ? "rounded-2xl rounded-br-sm" : "rounded-2xl rounded-bl-sm")}
+        className={cn(
+          "max-w-[82%] text-sm leading-relaxed px-3.5 py-2.5",
+          isUser ? "rounded-2xl rounded-br-sm" : "rounded-2xl rounded-bl-sm"
+        )}
         style={
           isUser
             ? {
-                background: "linear-gradient(135deg, rgb(242,98,34) 0%, rgb(210,80,20) 100%)",
+                background: "rgb(var(--accent))",
                 color: "white",
-                padding: "10px 16px",
-                boxShadow: "0 1px 3px rgba(242,98,34,0.25), 0 4px 12px rgba(242,98,34,0.15)",
               }
             : {
-                background: "rgba(255,255,255,0.72)",
-                border: "1px solid rgba(var(--line), 0.65)",
-                borderLeft: "2px solid rgba(242,98,34,0.35)",
+                background: "rgb(var(--line-2))",
+                border: "1px solid rgb(var(--line))",
                 color: "rgb(var(--ink))",
-                padding: "10px 16px",
-                boxShadow: "0 1px 3px rgba(20,12,4,0.04), 0 4px 12px rgba(20,12,4,0.06)",
               }
         }
       >
@@ -70,9 +65,9 @@ export function ChatMessage({ role, content, index = 0 }: ChatMessageProps) {
         <div
           className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mb-0.5 text-[9px] font-bold"
           style={{
-            background: "rgba(var(--line), 0.8)",
+            background: "rgb(var(--line))",
             color: "rgb(var(--muted))",
-            border: "1px solid rgba(var(--line), 0.9)",
+            border: "1px solid rgb(var(--line))",
           }}
           aria-hidden="true"
         >

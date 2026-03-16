@@ -7,26 +7,25 @@
 
 @layer base {
   :root {
-    /* Surface */
-    --paper: 255 251 243;
-    --paper-2: 250 244 233;
+    /* Surfaces */
+    --paper: 250 250 250;
+    --paper-2: 245 245 245;
     --paper-3: 255 255 255;
 
     /* Text */
-    --ink: 15 13 11;
-    --ink-2: 32 28 24;
-    --muted: 100 94 88;
-    --muted-2: 148 140 132;
+    --ink: 17 24 39;
+    --ink-2: 31 41 55;
+    --muted: 107 114 128;
+    --muted-2: 156 163 175;
 
     /* Structure */
-    --line: 228 216 200;
-    --line-2: 242 234 222;
-    --surface: 248 245 240;
+    --line: 229 231 235;
+    --line-2: 243 244 246;
+    --surface: 249 250 251;
 
     /* Brand */
     --accent: 242 98 34;
     --accent-2: 192 73 15;
-    --accent-glow: 242 98 34;
 
     /* Semantic */
     --success: 22 163 74;
@@ -34,23 +33,7 @@
     --danger: 220 38 38;
 
     /* Shadows */
-    --shadow-color: 20 12 4;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --paper: 13 11 9;
-      --paper-2: 18 15 12;
-      --paper-3: 22 19 16;
-      --ink: 242 238 232;
-      --ink-2: 220 212 204;
-      --muted: 148 138 128;
-      --muted-2: 100 92 84;
-      --line: 36 30 24;
-      --line-2: 28 23 18;
-      --surface: 20 16 13;
-      --shadow-color: 0 0 0;
-    }
+    --shadow-color: 0 0 0;
   }
 
   html,
@@ -59,122 +42,48 @@
   }
 
   body {
-    font-family: var(--font-sans);
+    font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
     color: rgb(var(--ink));
     background-color: rgb(var(--paper));
-    background-image:
-      radial-gradient(ellipse 1400px 900px at 12% 8%, rgba(var(--accent), 0.08), transparent 55%),
-      radial-gradient(ellipse 1000px 700px at 88% 2%, rgba(var(--accent-2), 0.07), transparent 50%),
-      radial-gradient(ellipse 900px 700px at 50% 100%, rgba(var(--shadow-color), 0.05), transparent 55%),
-      linear-gradient(180deg, rgb(var(--paper)) 0%, rgb(var(--paper-2)) 100%);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Focus ring system */
   *:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px rgb(var(--paper-3)), 0 0 0 4px rgba(var(--accent), 0.55);
+    box-shadow: 0 0 0 2px rgb(var(--paper-3)), 0 0 0 4px rgba(var(--accent), 0.5);
     border-radius: inherit;
   }
 
-  /* Selection */
   ::selection {
-    background-color: rgba(var(--accent), 0.18);
+    background-color: rgba(var(--accent), 0.15);
     color: rgb(var(--ink));
   }
 }
 
 @layer components {
-  /* Premium paper card */
-  .paper {
-    background:
-      linear-gradient(160deg, rgba(255, 255, 255, 0.82) 0%, rgba(255, 255, 255, 0.58) 100%),
-      radial-gradient(700px 500px at 5% 0%, rgba(var(--accent), 0.07), transparent 60%),
-      radial-gradient(600px 500px at 95% 15%, rgba(var(--accent-2), 0.06), transparent 55%);
-    border: 1px solid rgba(var(--line), 0.85);
-    box-shadow:
-      0 0 0 0.5px rgba(255, 255, 255, 0.6) inset,
-      0 1px 0 rgba(255, 255, 255, 0.7) inset,
-      0 1px 3px rgba(var(--shadow-color), 0.06),
-      0 8px 24px rgba(var(--shadow-color), 0.08);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    .paper {
-      background:
-        linear-gradient(160deg, rgba(40, 34, 28, 0.92) 0%, rgba(28, 23, 18, 0.88) 100%),
-        radial-gradient(700px 500px at 5% 0%, rgba(var(--accent), 0.06), transparent 60%);
-      border: 1px solid rgba(var(--line), 1);
-      box-shadow:
-        0 0 0 0.5px rgba(255, 255, 255, 0.04) inset,
-        0 1px 0 rgba(255, 255, 255, 0.06) inset,
-        0 1px 3px rgba(0, 0, 0, 0.24),
-        0 8px 24px rgba(0, 0, 0, 0.32);
-    }
-  }
-
-  /* Card with inner glow — use for elevated surfaces */
+  /* Clean card surface */
   .card {
     background: rgb(var(--paper-3));
-    border: 1px solid rgba(var(--line), 0.7);
-    box-shadow:
-      0 0 0 0.5px rgba(255, 255, 255, 0.5) inset,
-      0 1px 0 rgba(255, 255, 255, 0.6) inset,
-      0 2px 4px rgba(var(--shadow-color), 0.05),
-      0 12px 32px rgba(var(--shadow-color), 0.1);
-    border-radius: 16px;
+    border: 1px solid rgb(var(--line));
+    box-shadow: 0 1px 3px rgba(var(--shadow-color), 0.06), 0 4px 12px rgba(var(--shadow-color), 0.04);
+    border-radius: 12px;
   }
 
-  @media (prefers-color-scheme: dark) {
-    .card {
-      background: rgb(var(--paper-2));
-      border: 1px solid rgba(var(--line), 1);
-      box-shadow:
-        0 0 0 0.5px rgba(255, 255, 255, 0.03) inset,
-        0 2px 4px rgba(0, 0, 0, 0.28),
-        0 12px 32px rgba(0, 0, 0, 0.36);
-    }
-  }
-
-  /* Grain texture overlay */
-  .grain {
-    position: relative;
-    isolation: isolate;
-  }
-
-  .grain::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    opacity: 0.045;
-    mix-blend-mode: multiply;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    background-size: 200px 200px;
-    border-radius: inherit;
-    z-index: 0;
-  }
-
-  .grain > * {
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Display / heading typography */
+  /* Display / heading typography — uses the same sans font, bold */
   .display {
-    font-family: var(--font-display);
-    font-variation-settings: "opsz" 72;
-    letter-spacing: -0.025em;
+    font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
 
   /* Skeleton loading state */
   .skeleton {
     background: linear-gradient(
       90deg,
-      rgba(var(--line), 0.5) 0%,
-      rgba(var(--line-2), 0.8) 50%,
-      rgba(var(--line), 0.5) 100%
+      rgb(var(--line)) 0%,
+      rgb(var(--line-2)) 50%,
+      rgb(var(--line)) 100%
     );
     background-size: 200% 100%;
     animation: shimmer 1.6s ease-in-out infinite;
@@ -197,7 +106,7 @@
   /* Scrollbar */
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: rgba(var(--accent), 0.25) transparent;
+    scrollbar-color: rgba(var(--line), 1) transparent;
   }
 
   .scrollbar-thin::-webkit-scrollbar {
@@ -210,12 +119,12 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: rgba(var(--accent), 0.28);
+    background-color: rgb(var(--line));
     border-radius: 4px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(var(--accent), 0.48);
+    background-color: rgb(var(--muted-2));
   }
 }
 
@@ -231,7 +140,7 @@
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -242,7 +151,7 @@
 @keyframes slideInLeft {
   from {
     opacity: 0;
-    transform: translateX(-10px);
+    transform: translateX(-8px);
   }
   to {
     opacity: 1;
@@ -258,7 +167,7 @@
 @keyframes step-in {
   from {
     opacity: 0;
-    transform: translateX(-12px);
+    transform: translateX(-10px);
   }
   to {
     opacity: 1;
@@ -268,8 +177,8 @@
 
 @keyframes dot-pulse {
   0%, 60%, 100% {
-    opacity: 0.25;
-    transform: scale(0.8);
+    opacity: 0.3;
+    transform: scale(0.85);
   }
   30% {
     opacity: 1;
@@ -282,33 +191,27 @@
   to   { width: 100%; }
 }
 
-@keyframes orb-float {
-  0%, 100% { transform: translate(-50%, -50%) scale(1); }
-  33%       { transform: translate(-50%, -50%) scale(1.06) rotate(2deg); }
-  66%       { transform: translate(-50%, -50%) scale(0.96) rotate(-1deg); }
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
 @keyframes pulse-ring {
   0%   { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(var(--accent), 0.35); }
-  70%  { transform: scale(1);    box-shadow: 0 0 0 10px rgba(var(--accent), 0); }
+  70%  { transform: scale(1);    box-shadow: 0 0 0 8px rgba(var(--accent), 0); }
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(var(--accent), 0); }
-}
-
-@keyframes spin-slow {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
 }
 
 /* ──────────────────────────────────────────────────
    Animation utility classes
 ────────────────────────────────────────────────── */
 
-.animate-fade-in  { animation: fadeIn 0.4s ease forwards; }
-.animate-slide-up { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.animate-slide-left { animation: slideInLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.step-animate     { animation: step-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-.dot-pulse        { animation: dot-pulse 1.4s ease-in-out infinite; }
-.animate-spin-slow { animation: spin-slow 2.4s linear infinite; }
+.animate-fade-in    { animation: fadeIn 0.3s ease forwards; }
+.animate-slide-up   { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-slide-left { animation: slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.step-animate       { animation: step-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.dot-pulse          { animation: dot-pulse 1.4s ease-in-out infinite; }
+.animate-spin-slow  { animation: spin-slow 2s linear infinite; }
 .animate-pulse-ring { animation: pulse-ring 2s ease-out infinite; }
 
 /* ──────────────────────────────────────────────────
@@ -316,25 +219,22 @@
 ────────────────────────────────────────────────── */
 
 .react-flow__controls {
-  border: 1px solid rgba(var(--line), 0.9) !important;
-  border-radius: 12px !important;
+  border: 1px solid rgb(var(--line)) !important;
+  border-radius: 10px !important;
   overflow: hidden;
-  box-shadow:
-    0 1px 3px rgba(var(--shadow-color), 0.06),
-    0 4px 12px rgba(var(--shadow-color), 0.08) !important;
-  background: rgba(255, 255, 255, 0.9) !important;
-  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 3px rgba(var(--shadow-color), 0.06), 0 4px 12px rgba(var(--shadow-color), 0.04) !important;
+  background: rgb(var(--paper-3)) !important;
 }
 
 .react-flow__controls-button {
   background: transparent !important;
-  border-bottom: 1px solid rgba(var(--line), 0.5) !important;
+  border-bottom: 1px solid rgb(var(--line)) !important;
   color: rgb(var(--muted)) !important;
   transition: background 0.15s, color 0.15s;
 }
 
 .react-flow__controls-button:hover {
-  background: rgba(var(--accent), 0.06) !important;
+  background: rgba(var(--accent), 0.05) !important;
   color: rgb(var(--accent)) !important;
 }
 
@@ -343,12 +243,10 @@
 }
 
 .react-flow__minimap {
-  border: 1px solid rgba(var(--line), 0.9) !important;
-  border-radius: 12px !important;
+  border: 1px solid rgb(var(--line)) !important;
+  border-radius: 10px !important;
   overflow: hidden;
-  box-shadow:
-    0 1px 3px rgba(var(--shadow-color), 0.06),
-    0 4px 12px rgba(var(--shadow-color), 0.08) !important;
+  box-shadow: 0 1px 3px rgba(var(--shadow-color), 0.06), 0 4px 12px rgba(var(--shadow-color), 0.04) !important;
 }
 
 .react-flow__edge-path {
@@ -362,9 +260,9 @@
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  height: 4px;
+  height: 3px;
   border-radius: 4px;
-  background: rgba(var(--line), 0.8);
+  background: rgb(var(--line));
   outline: none;
   cursor: pointer;
 }
@@ -372,30 +270,26 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: rgb(var(--accent));
   border: 2px solid white;
-  box-shadow: 0 1px 4px rgba(var(--accent), 0.4), 0 0 0 0 rgba(var(--accent), 0.2);
+  box-shadow: 0 1px 3px rgba(var(--shadow-color), 0.15);
   transition: box-shadow 0.2s;
   cursor: pointer;
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-  box-shadow: 0 1px 4px rgba(var(--accent), 0.5), 0 0 0 5px rgba(var(--accent), 0.12);
-}
-
-input[type="range"]::-webkit-slider-thumb:active {
-  box-shadow: 0 1px 4px rgba(var(--accent), 0.5), 0 0 0 7px rgba(var(--accent), 0.16);
+  box-shadow: 0 1px 3px rgba(var(--shadow-color), 0.15), 0 0 0 4px rgba(var(--accent), 0.1);
 }
 
 input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: rgb(var(--accent));
   border: 2px solid white;
-  box-shadow: 0 1px 4px rgba(var(--accent), 0.4);
+  box-shadow: 0 1px 3px rgba(var(--shadow-color), 0.15);
   cursor: pointer;
 }

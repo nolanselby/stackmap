@@ -38,22 +38,20 @@ export function ChatInput({ onSubmit, disabled, placeholder }: ChatInputProps) {
   }
 
   const canSubmit = !disabled && value.trim().length > 0
-  const charCount = value.length
-  const showCount = focused && charCount > 80
 
   return (
     <form onSubmit={handleSubmit} className="relative w-full">
       <div
-        className="relative transition-all duration-200"
+        className="relative transition-all duration-150"
         style={{
-          borderRadius: "14px",
+          borderRadius: "10px",
           border: focused
-            ? "1px solid rgba(242,98,34,0.5)"
-            : "1px solid rgba(var(--line), 0.85)",
-          background: focused ? "rgba(255,255,255,0.92)" : "rgba(255,255,255,0.6)",
+            ? "1px solid rgba(var(--accent), 0.45)"
+            : "1px solid rgb(var(--line))",
+          background: "rgb(var(--paper-3))",
           boxShadow: focused
-            ? "0 0 0 3px rgba(242,98,34,0.1), 0 2px 8px rgba(20,12,4,0.06)"
-            : "0 1px 3px rgba(20,12,4,0.05)",
+            ? "0 0 0 3px rgba(var(--accent), 0.08)"
+            : "none",
         }}
       >
         <textarea
@@ -69,24 +67,14 @@ export function ChatInput({ onSubmit, disabled, placeholder }: ChatInputProps) {
           disabled={disabled}
           className={cn(
             "w-full resize-none bg-transparent",
-            "px-4 py-3 pr-12",
+            "px-3.5 py-2.5 pr-11",
             "text-sm leading-relaxed text-[rgb(var(--ink))] placeholder:text-[rgb(var(--muted-2))]",
             "focus:outline-none",
-            "disabled:opacity-50 disabled:cursor-not-allowed",
+            "disabled:opacity-40 disabled:cursor-not-allowed",
             "max-h-[200px]"
           )}
-          style={{ borderRadius: "14px", display: "block" }}
+          style={{ borderRadius: "10px", display: "block" }}
         />
-
-        {/* Character count */}
-        {showCount && (
-          <div
-            className="absolute bottom-3 left-4 text-[10px] tabular-nums pointer-events-none"
-            style={{ color: charCount > 400 ? "rgb(var(--accent))" : "rgb(var(--muted-2))" }}
-          >
-            {charCount}
-          </div>
-        )}
 
         {/* Send button */}
         <button
@@ -94,20 +82,19 @@ export function ChatInput({ onSubmit, disabled, placeholder }: ChatInputProps) {
           disabled={!canSubmit}
           aria-label="Send message"
           className={cn(
-            "absolute right-2.5 bottom-2.5",
-            "h-8 w-8 rounded-[10px] flex items-center justify-center",
+            "absolute right-2 bottom-2",
+            "h-7 w-7 rounded-[8px] flex items-center justify-center",
             "transition-all duration-150"
           )}
           style={
             canSubmit
               ? {
-                  background: "linear-gradient(135deg, rgb(242,98,34) 0%, rgb(210,80,20) 100%)",
+                  background: "rgb(var(--accent))",
                   color: "white",
-                  boxShadow: "0 1px 4px rgba(242,98,34,0.35), 0 2px 8px rgba(242,98,34,0.2)",
                 }
               : {
-                  background: "rgba(var(--line), 0.5)",
-                  color: "rgba(var(--muted), 0.5)",
+                  background: "rgb(var(--line))",
+                  color: "rgb(var(--muted-2))",
                   cursor: "not-allowed",
                 }
           }

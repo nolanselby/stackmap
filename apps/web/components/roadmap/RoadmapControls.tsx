@@ -23,7 +23,7 @@ const VARIANTS: { value: Variant; label: string; icon: string }[] = [
 const BUDGET_STEPS = [0, 50, 100, 200, 500, 1000]
 
 function GraphIcon({ active }: { active: boolean }) {
-  const color = active ? "rgb(242,98,34)" : "rgb(var(--muted))"
+  const color = active ? "rgb(var(--accent))" : "rgb(var(--muted))"
   return (
     <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4" aria-hidden="true">
       <rect x="1" y="1" width="5" height="4" rx="1.2" fill={color} />
@@ -39,7 +39,7 @@ function GraphIcon({ active }: { active: boolean }) {
 }
 
 function ListIcon({ active }: { active: boolean }) {
-  const color = active ? "rgb(242,98,34)" : "rgb(var(--muted))"
+  const color = active ? "rgb(var(--accent))" : "rgb(var(--muted))"
   return (
     <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4" aria-hidden="true">
       <line x1="5" y1="4" x2="14" y2="4" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
@@ -66,18 +66,16 @@ export function RoadmapControls({
     <div
       className="flex-shrink-0 flex flex-wrap items-center gap-2.5 px-4 sm:px-5 py-2.5"
       style={{
-        borderBottom: "1px solid rgba(var(--line), 0.7)",
-        background: "rgba(255,255,255,0.45)",
-        backdropFilter: "blur(8px)",
-        WebkitBackdropFilter: "blur(8px)",
+        borderBottom: "1px solid rgb(var(--line))",
+        background: "rgb(var(--paper-3))",
       }}
     >
       {/* Variant toggle pills */}
       <div
-        className="flex rounded-[12px] p-0.5 gap-0.5"
+        className="flex rounded-lg p-0.5 gap-0.5"
         style={{
-          background: "rgba(var(--line), 0.4)",
-          border: "1px solid rgba(var(--line), 0.8)",
+          background: "rgb(var(--line-2))",
+          border: "1px solid rgb(var(--line))",
         }}
       >
         {VARIANTS.map((v) => {
@@ -87,15 +85,15 @@ export function RoadmapControls({
               key={v.value}
               onClick={() => onVariantChange(v.value)}
               className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-[9px] text-[12px] font-medium transition-all duration-150",
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[12px] font-medium transition-all duration-150",
                 "focus-visible:outline-none"
               )}
               style={
                 isActive
                   ? {
-                      background: "white",
+                      background: "rgb(var(--paper-3))",
                       color: "rgb(var(--ink))",
-                      boxShadow: "0 1px 3px rgba(20,12,4,0.08), 0 0 0 0.5px rgba(20,12,4,0.06)",
+                      boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
                     }
                   : {
                       background: "transparent",
@@ -119,16 +117,16 @@ export function RoadmapControls({
 
       {/* Divider */}
       <div
-        className="hidden sm:block w-px h-5"
-        style={{ background: "rgba(var(--line), 0.9)" }}
+        className="hidden sm:block w-px h-4"
+        style={{ background: "rgb(var(--line))" }}
       />
 
       {/* View mode toggle */}
       <div
-        className="flex rounded-[12px] p-0.5 gap-0.5"
+        className="flex rounded-lg p-0.5 gap-0.5"
         style={{
-          background: "rgba(var(--line), 0.4)",
-          border: "1px solid rgba(var(--line), 0.8)",
+          background: "rgb(var(--line-2))",
+          border: "1px solid rgb(var(--line))",
         }}
       >
         {(["graph", "list"] as const).map((mode) => {
@@ -139,14 +137,14 @@ export function RoadmapControls({
               onClick={() => onViewModeChange(mode)}
               title={`${mode === "graph" ? "Graph" : "List"} view`}
               className={cn(
-                "p-2 rounded-[9px] transition-all duration-150 flex items-center justify-center",
+                "p-1.5 rounded-md transition-all duration-150 flex items-center justify-center",
                 "focus-visible:outline-none"
               )}
               style={
                 isActive
                   ? {
-                      background: "white",
-                      boxShadow: "0 1px 3px rgba(20,12,4,0.08)",
+                      background: "rgb(var(--paper-3))",
+                      boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
                     }
                   : {
                       background: "transparent",
@@ -167,13 +165,13 @@ export function RoadmapControls({
       <div className="flex items-center gap-3 ml-auto">
         <div className="flex items-center gap-2">
           <span
-            className="text-[10px] font-semibold uppercase tracking-[0.18em]"
+            className="text-[10px] font-semibold uppercase tracking-[0.15em]"
             style={{ color: "rgb(var(--muted-2))" }}
           >
             Budget
           </span>
           <span
-            className="text-[12px] font-bold tabular-nums min-w-[64px] text-right"
+            className="text-[12px] font-semibold tabular-nums min-w-[64px] text-right"
             style={{ color: "rgb(var(--ink))" }}
           >
             {budgetLabel}

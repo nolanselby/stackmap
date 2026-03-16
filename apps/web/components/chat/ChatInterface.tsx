@@ -70,27 +70,27 @@ export function ChatInterface() {
   const isComplete = hasTriggeredRef.current
 
   return (
-    <div className="flex flex-col" style={{ minHeight: "420px", maxHeight: "600px" }}>
+    <div className="flex flex-col" style={{ minHeight: "420px", maxHeight: "580px" }}>
 
       {/* Header */}
       <div
-        className="flex-shrink-0 flex items-center justify-between px-6 pt-5 pb-4"
-        style={{ borderBottom: "1px solid rgba(var(--line), 0.5)" }}
+        className="flex-shrink-0 flex items-center justify-between px-5 pt-4 pb-3.5"
+        style={{ borderBottom: "1px solid rgb(var(--line))" }}
       >
         <div>
-          <h2 className="display text-[18px] leading-tight" style={{ color: "rgb(var(--ink))" }}>
+          <h2 className="font-semibold text-[15px]" style={{ color: "rgb(var(--ink))" }}>
             Build your roadmap
           </h2>
           <p className="text-[12px] mt-0.5" style={{ color: "rgb(var(--muted))" }}>
             Answer a few questions — we'll handle the rest.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {isComplete ? (
             <>
               <span
-                className="w-2 h-2 rounded-full inline-block"
-                style={{ background: "rgb(var(--accent))", animation: "pulse-ring 2s ease-out infinite" }}
+                className="w-2 h-2 rounded-full inline-block animate-pulse-ring"
+                style={{ background: "rgb(var(--accent))" }}
               />
               <span className="text-[12px] font-medium" style={{ color: "rgb(var(--accent))" }}>
                 Generating
@@ -105,18 +105,14 @@ export function ChatInterface() {
                 />
                 <span className="relative inline-flex rounded-full w-2 h-2" style={{ background: "#22c55e" }} />
               </span>
-              <span className="text-[12px] font-medium" style={{ color: "rgb(var(--muted))" }}>
-                Ready
-              </span>
+              <span className="text-[12px]" style={{ color: "rgb(var(--muted))" }}>Ready</span>
             </>
           )}
         </div>
       </div>
 
       {/* Messages */}
-      <div
-        className="flex-1 overflow-y-auto px-5 py-5 space-y-3 min-h-0 scrollbar-thin"
-      >
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0 scrollbar-thin">
         {messages.map((m, i) => (
           <ChatMessage
             key={m.id}
@@ -128,19 +124,18 @@ export function ChatInterface() {
 
         {/* Typing indicator */}
         {isLoading && (
-          <div className="flex justify-start items-end gap-2.5 animate-slide-up">
+          <div className="flex justify-start items-end gap-2 animate-slide-up">
             <div
               className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-[9px] font-bold text-white"
-              style={{ background: "linear-gradient(135deg, rgb(242,98,34), rgb(192,73,15))" }}
+              style={{ background: "rgb(var(--accent))" }}
             >
               AI
             </div>
             <div
-              className="grain rounded-2xl rounded-bl-sm px-4 py-3"
+              className="rounded-2xl rounded-bl-sm px-3.5 py-2.5"
               style={{
-                background: "rgba(255,255,255,0.75)",
-                border: "1px solid rgba(var(--line), 0.7)",
-                borderLeft: "2px solid rgba(242,98,34,0.4)",
+                background: "rgb(var(--line-2))",
+                border: "1px solid rgb(var(--line))",
               }}
             >
               <div className="flex gap-1.5 items-center h-4">
@@ -149,7 +144,7 @@ export function ChatInterface() {
                     key={delay}
                     className="w-1.5 h-1.5 rounded-full dot-pulse"
                     style={{
-                      background: "rgb(var(--accent))",
+                      background: "rgb(var(--muted-2))",
                       animationDelay: `${delay}ms`,
                     }}
                   />
@@ -161,12 +156,12 @@ export function ChatInterface() {
 
         {/* Generating transition */}
         {isComplete && (
-          <div className="flex justify-center py-3 animate-slide-up">
+          <div className="flex justify-center py-2 animate-slide-up">
             <div
-              className="grain flex items-center gap-2.5 rounded-full px-4 py-2"
+              className="flex items-center gap-2 rounded-full px-4 py-2"
               style={{
-                background: "rgba(242,98,34,0.08)",
-                border: "1px solid rgba(242,98,34,0.22)",
+                background: "rgba(var(--accent), 0.06)",
+                border: "1px solid rgba(var(--accent), 0.18)",
               }}
             >
               <svg
@@ -191,8 +186,8 @@ export function ChatInterface() {
 
       {/* Input area */}
       <div
-        className="flex-shrink-0 px-5 pb-5 pt-4"
-        style={{ borderTop: "1px solid rgba(var(--line), 0.5)" }}
+        className="flex-shrink-0 px-4 pb-4 pt-3"
+        style={{ borderTop: "1px solid rgb(var(--line))" }}
       >
         <ChatInput
           onSubmit={handleSubmit}
