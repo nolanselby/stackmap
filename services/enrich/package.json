@@ -9,15 +9,16 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0",
     "@roadmapper/db": "workspace:*",
+    "@roadmapper/prompts": "workspace:*",
     "@roadmapper/schemas": "workspace:*",
     "@roadmapper/scoring": "workspace:*",
-    "@roadmapper/prompts": "workspace:*",
     "cheerio": "^1.0.0",
     "openai": "^4.70.0"
   },
   "devDependencies": {
-    "vitest": "^2.1.0",
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
   }
 }

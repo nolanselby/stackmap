@@ -17,6 +17,7 @@ const SAMPLE_RESULT = {
       setup_difficulty: "low",
       lock_in_risk: "medium",
       budget_constrained: false,
+      action_steps: [],
     },
     {
       stage_name: "Email Sequencing",
@@ -29,6 +30,7 @@ const SAMPLE_RESULT = {
       setup_difficulty: "medium",
       lock_in_risk: "low",
       budget_constrained: false,
+      action_steps: [],
     },
   ],
   total_monthly_cost_best_overall: 86,
