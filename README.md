@@ -17,12 +17,12 @@ AI Tool Roadmapper is an open-source tool that helps founders and developers dis
 ## Features
 
 - **Conversational requirements gathering** — Claude asks the right questions to understand your use case, team size, and budget before making any recommendations.
-- **Curated tool database** — A vetted, categorized database of AI tools (LLMs, embedding models, vector databases, orchestration frameworks, and more) with pricing and capability metadata.
+- **Manually curated tool database** — A vetted, categorized database of 150+ AI tools with pricing and capability metadata.
 - **Visual interactive roadmap** — A React Flow graph showing your recommended stack organized by phase, with dependency arrows and timeline guidance.
 - **Cost estimation** — Per-tool and total stack cost estimates based on your expected usage.
 - **Alternatives** — Every recommendation includes alternatives so you can make informed trade-offs.
 - **Export** — Copy or download your roadmap as structured data.
-- **Background ingestion** — Inngest-powered jobs keep the tool database fresh by ingesting from GitHub, Product Hunt, and curated directories.
+- **Background enrichment** — Inngest-powered jobs handle tool classification, scoring, and embedding generation.
 
 ---
 
@@ -58,7 +58,6 @@ AI Tool Roadmapper is an open-source tool that helps founders and developers dis
 | `packages/schemas` | Shared Zod schemas |
 | `packages/scoring` | Tool scoring and ranking logic |
 | `services/enrich` | Tool metadata enrichment (classifier, deduplicator) |
-| `services/ingest` | Data ingestion from GitHub, Product Hunt, directories |
 | `services/planner` | Roadmap generation and tool retrieval |
 
 ---
@@ -82,17 +81,17 @@ cd ai-tool-roadmapper
 
 ---
 
-## Tool Database & Public Data
+## Tool Database
 
-This project is built to serve as a **public, crowdsourced database of AI tools**.
+This project is built on a **manually curated database of AI tools**.
 
 ### Accessing the Data
 - **Structured Schema**: The Postgres schema for all tools, pricing, and capabilities is located in [`packages/db/src/schema.ts`](packages/db/src/schema.ts).
-- **Seeding**: You can populate your own instance of the database using the scripts in `scripts/bulk-seed.ts`.
+- **Seeding**: You can populate your own instance using `node scripts/apply-seed.mjs`.
 - **Enrichment Logic**: The logic for how tools are classified and scored is open-source in `services/enrich` and `packages/scoring`.
 
 ### Contributing Tools
-If you'd like to add a tool to the global database, please submit a PR with a new staging record or use the built-in scraper ingestion functions.
+If you'd like to add a tool to the database, please submit a PR with the tool data added to the seed file.
 
 ### 2. Install dependencies
 
@@ -150,7 +149,6 @@ ai-tool-roadmapper/
 │   └── scoring/                 # Tool scoring and ranking algorithms
 ├── services/
 │   ├── enrich/                  # Tool enrichment (classify, deduplicate)
-│   ├── ingest/                  # Data ingestion (GitHub, Product Hunt, dirs)
 │   └── planner/                 # Roadmap generation and retrieval
 ├── scripts/                     # Utility scripts (seeding, etc.)
 ├── docs/                        # Additional documentation

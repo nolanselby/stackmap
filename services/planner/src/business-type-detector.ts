@@ -24,9 +24,10 @@ export async function detectBusinessType(
   const client = new Anthropic({ apiKey })
 
   const prompt = buildBusinessTypePrompt(idea, customer)
+  const model = "claude-sonnet-4-20250514"
 
   const response = await client.messages.create({
-    model: "claude-3-5-sonnet-20241022",
+    model,
     max_tokens: 100,
     messages: [{ role: "user", content: prompt + "\n\nPlease respond in JSON format." }],
   })

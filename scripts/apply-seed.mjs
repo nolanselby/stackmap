@@ -189,7 +189,7 @@ const BOOL_COLS = new Set([
 ]);
 const NUM_COLS = new Set([
   'founded_year', 'starting_price_monthly', 'est_cost_5_users',
-  'est_cost_20_users', 'confidence', 'github_stars', 'producthunt_votes',
+  'est_cost_20_users',   'confidence', 'github_stars',
   'popularity_score', 'trust_score',
 ]);
 const STR_COLS = new Set([

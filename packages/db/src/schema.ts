@@ -228,8 +228,6 @@ export const toolSignals = pgTable(
     github_forks: integer("github_forks"),
     github_last_commit: date("github_last_commit"),
     github_last_commit_at: timestamp("github_last_commit_at", { withTimezone: true }),
-    producthunt_votes: integer("producthunt_votes"),
-    producthunt_featured_at: timestamp("producthunt_featured_at", { withTimezone: true }),
     traffic_estimate: integer("traffic_estimate"),
     review_count: integer("review_count"),
     source_count: integer("source_count").default(0),

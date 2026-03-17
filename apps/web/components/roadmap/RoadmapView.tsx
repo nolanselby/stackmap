@@ -1,66 +1,216 @@
 "use client"
 import { useState } from "react"
-import dynamic from "next/dynamic"
 import { cn } from "@/lib/utils"
-import { RoadmapList } from "./RoadmapList"
 import { ExportMenu } from "./ExportMenu"
-import { Share2, Check } from "lucide-react"
-import type { RoadmapResult } from "@roadmapper/schemas"
+import { Share2, Check, ExternalLink, ChevronDown } from "lucide-react"
+import type { RoadmapResult, WorkflowStage } from "@roadmapper/schemas"
 
 type Variant = "best-overall" | "cheapest" | "open-source"
-type ViewMode = "graph" | "list"
 
-// Lazy-load React Flow to avoid SSR issues
-const RoadmapGraph = dynamic(
-  () => import("./RoadmapGraph").then((m) => ({ default: m.RoadmapGraph })),
-  {
-    ssr: false,
-    loading: () => (
-      <div
-        className="w-full h-full rounded-2xl flex items-center justify-center"
-        style={{
-          background: "rgb(var(--paper))",
-          border: "1px solid rgb(var(--line))",
-        }}
-      >
-        <div className="text-center space-y-3">
-          <div
-            className="w-7 h-7 rounded-full mx-auto"
-            style={{
-              border: "2px solid rgb(var(--line))",
-              borderTopColor: "rgb(var(--accent))",
-              animation: "spin-slow 1.2s linear infinite",
-            }}
-          />
-          <span className="text-sm" style={{ color: "rgb(var(--muted))" }}>
-            Loading graph…
-          </span>
-        </div>
-      </div>
-    ),
-  }
-)
+type ToolMeta = {
+  logo_url: string | null
+  website_url: string | null
+  short_description: string | null
+}
 
 interface RoadmapViewProps {
   roadmap: RoadmapResult
   shortId: string
+  toolsMeta: Record<string, ToolMeta>
 }
 
-export function RoadmapView({ roadmap, shortId }: RoadmapViewProps) {
-  const [selectedStageId, setSelectedStageId] = useState<number | null>(null)
-  const [variant, setVariant] = useState<"best-overall" | "cheapest" | "open-source">(
-    "best-overall"
-  )
-  const [viewMode, setViewMode] = useState<"graph" | "list">("graph")
-  const [budgetMonthly, setBudgetMonthly] = useState(1000)
-  const [copied, setCopied] = useState(false)
+function ToolLogo({ toolId, toolName, toolsMeta, size = 40 }: { toolId: string; toolName: string; toolsMeta: Record<string, ToolMeta>; size?: number }) {
+  const meta = toolsMeta[toolId]
+  const logoUrl = meta?.logo_url
 
-  const selectedStage = roadmap.workflow_stages.find(s => s.stage_order === selectedStageId)
+  if (logoUrl) {
+    return (
+      <img
+        src={logoUrl}
+        alt={`${toolName} logo`}
+        width={size}
+        height={size}
+        className="rounded-lg object-contain"
+        style={{ width: size, height: size }}
+        onError={(e) => {
+          const target = e.target as HTMLImageElement
+          target.style.display = "none"
+          target.nextElementSibling?.classList.remove("hidden")
+        }}
+      />
+    )
+  }
+
+  return (
+    <div
+      className="rounded-lg bg-gray-100 flex items-center justify-center font-bold text-gray-400"
+      style={{ width: size, height: size, fontSize: size * 0.4 }}
+    >
+      {toolName.charAt(0).toUpperCase()}
+    </div>
+  )
+}
+
+function StepCard({
+  stage,
+  variant,
+  toolsMeta,
+  index,
+}: {
+  stage: WorkflowStage
+  variant: Variant
+  toolsMeta: Record<string, ToolMeta>
+  index: number
+}) {
+  const [showAlts, setShowAlts] = useState(false)
+
+  const tool =
+    variant === "cheapest"
+      ? (stage.cheapest_tool ?? stage.best_overall_tool)
+      : variant === "open-source"
+      ? (stage.opensource_tool ?? stage.best_overall_tool)
+      : stage.best_overall_tool
+
+  const meta = toolsMeta[tool.tool_id]
+  const websiteUrl = meta?.website_url
+  const description = meta?.short_description
+
+  const alternatives = [
+    variant !== "best-overall" && stage.best_overall_tool ? { label: "Best Overall", tool: stage.best_overall_tool } : null,
+    variant !== "cheapest" && stage.cheapest_tool ? { label: "Cheapest", tool: stage.cheapest_tool } : null,
+    variant !== "open-source" && stage.opensource_tool ? { label: "Open Source", tool: stage.opensource_tool } : null,
+  ].filter(Boolean) as Array<{ label: string; tool: { tool_id: string; name: string; why: string } }>
+
+  const actionSteps = (stage as any).action_steps as string[] | undefined
+
+  return (
+    <div
+      className="bg-white rounded-2xl border border-gray-200 overflow-hidden transition-all animate-slide-up"
+      style={{
+        boxShadow: "0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03)",
+        animationDelay: `${index * 80}ms`,
+        animationFillMode: "both",
+      }}
+    >
+      <div className="p-6">
+        {/* Step header */}
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+            {stage.stage_order}
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900">{stage.stage_name}</h3>
+        </div>
+
+        {/* Main tool card */}
+        <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl mb-4">
+          <ToolLogo toolId={tool.tool_id} toolName={tool.name} toolsMeta={toolsMeta} size={48} />
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-semibold text-gray-900 text-base">{tool.name}</span>
+              {stage.monthly_cost_estimate === 0 ? (
+                <span className="text-xs font-medium text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">Free</span>
+              ) : (
+                <span className="text-xs font-medium text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full">
+                  ${stage.monthly_cost_estimate}/mo
+                </span>
+              )}
+            </div>
+            {description && (
+              <p className="text-sm text-gray-500 mb-2 line-clamp-2">{description}</p>
+            )}
+            <p className="text-sm text-gray-600">{stage.why_chosen}</p>
+            {websiteUrl && (
+              <a
+                href={websiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-orange-600 hover:text-orange-700 mt-2 transition-colors"
+              >
+                Visit website
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            )}
+          </div>
+        </div>
+
+        {/* Action steps */}
+        {actionSteps && actionSteps.length > 0 && (
+          <div className="mb-4">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">How to get started</h4>
+            <ol className="space-y-2">
+              {actionSteps.map((step, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span className="w-5 h-5 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
+                    {i + 1}
+                  </span>
+                  <span className="text-sm text-gray-600">{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+
+        {/* Alternatives */}
+        {alternatives.length > 0 && (
+          <div className="border-t border-gray-100 pt-4">
+            <button
+              onClick={() => setShowAlts(!showAlts)}
+              className="flex items-center gap-1.5 text-sm font-medium text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              {showAlts ? "Hide" : "Show"} alternatives ({alternatives.length})
+              <ChevronDown className={cn("w-3.5 h-3.5 transition-transform", showAlts && "rotate-180")} />
+            </button>
+
+            {showAlts && (
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {alternatives.map((alt) => {
+                  const altMeta = toolsMeta[alt.tool.tool_id]
+                  return (
+                    <div key={alt.tool.tool_id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
+                      <ToolLogo toolId={alt.tool.tool_id} toolName={alt.tool.name} toolsMeta={toolsMeta} size={32} />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-gray-800 truncate">{alt.tool.name}</span>
+                          <span className="text-[10px] font-medium text-gray-400 uppercase tracking-wide flex-shrink-0">{alt.label}</span>
+                        </div>
+                        {alt.tool.why && (
+                          <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{alt.tool.why}</p>
+                        )}
+                        {altMeta?.website_url && (
+                          <a
+                            href={altMeta.website_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-orange-500 hover:text-orange-600 mt-1 inline-flex items-center gap-1"
+                          >
+                            Visit <ExternalLink className="w-2.5 h-2.5" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export function RoadmapView({ roadmap, shortId, toolsMeta }: RoadmapViewProps) {
+  const [variant, setVariant] = useState<Variant>("best-overall")
+  const [copied, setCopied] = useState(false)
 
   const totalCost =
     variant === "cheapest"
       ? roadmap.total_monthly_cost_cheapest
       : roadmap.total_monthly_cost_best_overall
+
+  const businessLabel = roadmap.business_type
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase())
 
   function handleShareCopy() {
     navigator.clipboard.writeText(window.location.href)
@@ -68,238 +218,127 @@ export function RoadmapView({ roadmap, shortId }: RoadmapViewProps) {
     setTimeout(() => setCopied(false), 2200)
   }
 
-  const businessLabel = roadmap.business_type
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase())
+  const sorted = [...(roadmap.workflow_stages ?? [])].sort((a, b) => a.stage_order - b.stage_order)
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden" style={{ background: "rgb(var(--figma-bg))", color: "white" }}>
-
-      {/* ── Figma Top Bar ── */}
-      <header
-        className="flex-shrink-0 h-12 flex items-center justify-between px-4 border-b border-white/5"
-        style={{ background: "rgb(var(--figma-toolbar))" }}
-      >
-        <div className="flex items-center gap-3 min-w-0">
-          <a href="/" className="hover:opacity-80 transition-opacity">
-            <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
-          </a>
-          <div className="h-4 w-px bg-white/10 mx-1" />
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="text-[12px] text-white/40 font-medium">Roadmap</span>
-            <span className="text-[12px] text-white/20">/</span>
-            <span className="text-[13px] font-semibold truncate text-white/90">{businessLabel}</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 rounded-md border border-white/5">
-             <span className="text-[11px] font-bold text-white/60 tabular-nums">${totalCost}/mo</span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleShareCopy}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-md text-[12px] font-medium transition-colors hover:bg-white/5 border border-white/10"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Share2 className="w-3.5 h-3.5" />}
-              {copied ? "Link Copied" : "Share"}
-            </button>
-            <ExportMenu shortId={shortId} />
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-14">
+            <div className="flex items-center gap-3 min-w-0">
+              <a href="/" className="text-orange-500 hover:text-orange-600 transition-colors flex-shrink-0">
+                <svg viewBox="0 0 24 24" className="w-6 h-6 fill-current">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                </svg>
+              </a>
+              <div className="h-5 w-px bg-gray-200" />
+              <h1 className="text-sm font-medium text-gray-900 truncate">{businessLabel}</h1>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleShareCopy}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 border border-gray-200 transition-colors"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Share2 className="w-3.5 h-3.5" />}
+                {copied ? "Copied" : "Share"}
+              </button>
+              <ExportMenu shortId={shortId} />
+            </div>
           </div>
         </div>
       </header>
 
-      {/* ── Figma Toolbar (Sub-header) ── */}
-      <div className="h-10 flex-shrink-0 flex items-center px-4 border-b border-white/5 gap-2" style={{ background: "rgb(var(--figma-toolbar))" }}>
-        <div className="flex items-center h-6 bg-white/5 rounded p-0.5 border border-white/5">
-           {VARIANTS.map(v => (
-             <button
-               key={v.value}
-               onClick={() => setVariant(v.value)}
-               className={cn(
-                 "px-3 h-full rounded text-[11px] font-medium transition-all",
-                 variant === v.value ? "bg-white/10 text-white shadow-sm" : "text-white/40 hover:text-white/60"
-               )}
-             >
-               {v.label}
-             </button>
-           ))}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
+        {/* Title section */}
+        <div className="text-center mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Your Roadmap</h2>
+          <p className="text-gray-500 text-sm">
+            {sorted.length} steps to build your {businessLabel.toLowerCase()} &middot;{" "}
+            <span className="font-medium text-gray-700">
+              {totalCost === 0 ? "Free" : `$${totalCost}/mo`}
+            </span>
+          </p>
         </div>
 
-        <div className="w-px h-4 bg-white/5 mx-1" />
-
-        <div className="flex items-center h-6 bg-white/5 rounded p-0.5 border border-white/5">
-          <button
-            onClick={() => setViewMode("graph")}
-            className={cn(
-              "px-2.5 h-full rounded transition-all",
-              viewMode === "graph" ? "bg-white/10 text-white" : "text-white/40"
-            )}
-          >
-            <div className="w-3.5 h-3.5 border-2 border-current rounded-sm opacity-60" />
-          </button>
-          <button
-            onClick={() => setViewMode("list")}
-            className={cn(
-              "px-2.5 h-full rounded transition-all",
-              viewMode === "list" ? "bg-white/10 text-white" : "text-white/40"
-            )}
-          >
-            <div className="w-3.5 h-3.5 flex flex-col gap-0.5 justify-center opacity-60">
-               <div className="h-0.5 w-full bg-current" />
-               <div className="h-0.5 w-full bg-current" />
-               <div className="h-0.5 w-full bg-current" />
-            </div>
-          </button>
-        </div>
-
-        <div className="flex-1" />
-
-        <div className="flex items-center gap-3">
-          <span className="text-[11px] text-white/40 uppercase tracking-wider font-bold">Max Budget</span>
-          <input
-            type="range"
-            min={0}
-            max={5}
-            value={BUDGET_STEPS.indexOf(budgetMonthly)}
-            onChange={(e) => setBudgetMonthly(BUDGET_STEPS[Number(e.target.value)])}
-            className="w-32 figma-range"
-          />
-          <span className="text-[11px] font-bold tabular-nums text-white/80 min-w-[50px]">
-            {budgetMonthly >= 1000 ? "Any" : `$${budgetMonthly}`}
-          </span>
-        </div>
-      </div>
-
-      <div className="flex-1 flex min-h-0">
-        {/* ── Left Sidebar (Stages/Layers) ── */}
-        <aside className="w-64 flex-shrink-0 border-r border-white/5 flex flex-col" style={{ background: "rgb(var(--figma-toolbar))" }}>
-          <div className="px-4 py-3 border-b border-white/5">
-             <span className="text-[11px] font-bold text-white/30 uppercase tracking-widest">Workflow Layers</span>
-          </div>
-          <div className="flex-1 overflow-y-auto scrollbar-thin">
-            {roadmap.workflow_stages.map((s) => (
+        {/* Variant tabs */}
+        <div className="flex items-center justify-center mb-8">
+          <div className="inline-flex items-center bg-gray-100 rounded-full p-1 gap-0.5">
+            {VARIANTS.map((v) => (
               <button
-                key={s.stage_order}
-                onClick={() => setSelectedStageId(s.stage_order)}
+                key={v.value}
+                onClick={() => setVariant(v.value)}
                 className={cn(
-                  "w-full flex items-center gap-3 px-4 py-2 transition-colors",
-                  selectedStageId === s.stage_order ? "bg-[rgb(var(--figma-blue))]/10 text-[rgb(var(--figma-blue))]" : "text-white/60 hover:bg-white/5 hover:text-white"
+                  "px-4 py-1.5 rounded-full text-sm font-medium transition-all",
+                  variant === v.value
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-500 hover:text-gray-700"
                 )}
               >
-                <div className={cn(
-                  "w-2 h-2 rounded-full",
-                  selectedStageId === s.stage_order ? "bg-[rgb(var(--figma-blue))]" : "bg-white/20"
-                )} />
-                <span className="text-[12px] font-medium truncate">{s.stage_name}</span>
-                <span className="ml-auto text-[10px] opacity-40">#{s.stage_order}</span>
+                {v.label}
               </button>
             ))}
           </div>
-        </aside>
+        </div>
 
-        {/* ── Main Canvas ── */}
-        <main className="flex-1 relative overflow-hidden" style={{ background: "rgb(var(--figma-canvas))" }}>
-          {viewMode === "graph" ? (
-            <RoadmapGraph
-              roadmap={roadmap}
+        {/* Steps */}
+        <div className="space-y-4">
+          {sorted.map((stage, i) => (
+            <StepCard
+              key={stage.stage_order}
+              stage={stage}
               variant={variant}
-              budgetMonthly={budgetMonthly}
-              onNodeClick={(id) => setSelectedStageId(Number(id.replace("stage-", "")))}
-              selectedId={selectedStageId ? `stage-${selectedStageId}` : null}
+              toolsMeta={toolsMeta}
+              index={i}
             />
-          ) : (
-            <div className="h-full overflow-y-auto scrollbar-thin">
-              <div className="max-w-3xl mx-auto px-5 py-6">
-                <RoadmapList
-                  roadmap={roadmap}
-                  variant={variant}
-                  budgetMonthly={budgetMonthly}
-                />
-              </div>
+          ))}
+        </div>
+
+        {/* Total cost summary */}
+        <div className="mt-8 bg-gray-900 text-white rounded-2xl p-6 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">Estimated monthly total</p>
+            <p className="text-sm text-gray-300">
+              {variant === "cheapest" ? "Cheapest stack" : variant === "open-source" ? "Open-source stack" : "Best overall stack"}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-3xl font-bold">{totalCost === 0 ? "Free" : `$${totalCost}`}</p>
+            {totalCost > 0 && <p className="text-xs text-gray-400 mt-0.5">per month</p>}
+          </div>
+        </div>
+
+        {/* Build sequence */}
+        {(roadmap.build_sequence?.length ?? 0) > 0 && (
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Build schedule</h3>
+            <div className="space-y-3">
+              {(roadmap.build_sequence ?? []).map((week) => (
+                <div key={week.week} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
+                  <div className="w-16 flex-shrink-0">
+                    <span className="text-xs font-bold text-orange-600 bg-orange-50 px-2.5 py-1 rounded-full">
+                      Week {week.week}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-800">{week.focus}</p>
+                    <p className="text-xs text-gray-400 mt-1">{week.tools.join(", ")}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-          )}
-        </main>
+          </div>
+        )}
 
-        {/* ── Right Sidebar (Inspector) ── */}
-        <aside className="w-[320px] flex-shrink-0 border-l border-white/5 flex flex-col" style={{ background: "rgb(var(--figma-toolbar))" }}>
-           {selectedStage ? (
-             <div className="flex-1 flex flex-col min-h-0 animate-fade-in">
-                <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
-                   <span className="text-[11px] font-bold text-white/30 uppercase tracking-widest">Stage Properties</span>
-                   <button onClick={() => setSelectedStageId(null)} className="text-white/40 hover:text-white transition-colors">
-                      <svg viewBox="0 0 16 16" className="w-3.5 h-3.5 fill-current"><path d="M12.5 3.5l-9 9m0-9l9 9" stroke="currentColor" strokeWidth="1.5"/></svg>
-                   </button>
-                </div>
-
-                <div className="p-4 space-y-6 overflow-y-auto scrollbar-thin">
-                   {/* Tool Identitiy */}
-                   <section>
-                      <h3 className="text-[14px] font-semibold text-white/90 mb-1">{selectedStage.stage_name}</h3>
-                      <p className="text-[12px] text-white/50 leading-relaxed mb-4">{selectedStage.why_chosen}</p>
-
-                      <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-                         <div className="flex items-center gap-2 mb-2">
-                            <span className="text-[10px] font-bold bg-[rgb(var(--figma-blue))] px-1.5 py-0.5 rounded text-white uppercase tracking-tighter">Selected Tool</span>
-                         </div>
-                         <p className="font-bold text-[15px] mb-1">
-                            {variant === 'cheapest' ? (selectedStage.cheapest_tool?.name ?? selectedStage.best_overall_tool.name) :
-                             variant === 'open-source' ? (selectedStage.opensource_tool?.name ?? selectedStage.best_overall_tool.name) :
-                             selectedStage.best_overall_tool.name}
-                         </p>
-                         <p className="text-[12px] text-white/60">
-                            ${selectedStage.monthly_cost_estimate}/month
-                         </p>
-                      </div>
-                   </section>
-
-                   {/* Alternatives */}
-                   <section>
-                      <h4 className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-3">Alternatives</h4>
-                      <div className="space-y-2">
-                         {[
-                           { type: 'Best Overall', tool: selectedStage.best_overall_tool, current: variant === 'best-overall' },
-                           { type: 'Cheapest', tool: selectedStage.cheapest_tool, current: variant === 'cheapest' },
-                           { type: 'Open Source', tool: selectedStage.opensource_tool, current: variant === 'open-source' }
-                         ].filter(t => t.tool).map((alt, i) => (
-                           <div key={i} className={cn(
-                             "p-3 rounded-lg border transition-all",
-                             alt.current ? "border-[rgb(var(--figma-blue))]/40 bg-[rgb(var(--figma-blue))]/5" : "border-white/5 bg-white/[0.02]"
-                           )}>
-                              <p className="text-[10px] text-white/40 mb-1">{alt.type}</p>
-                              <p className="text-[12px] font-semibold">{alt.tool!.name}</p>
-                              {alt.tool!.why && <p className="text-[11px] text-white/40 mt-1">{alt.tool!.why}</p>}
-                           </div>
-                         ))}
-                      </div>
-                   </section>
-
-                   {/* Difficulty & Risk */}
-                   <section>
-                      <h4 className="text-[10px] font-bold text-white/30 uppercase tracking-widest mb-3">Implementation</h4>
-                      <div className="grid grid-cols-2 gap-2">
-                         <div className="p-2.5 bg-white/5 rounded-lg border border-white/5">
-                            <p className="text-[10px] text-white/30 mb-1">Setup</p>
-                            <p className="text-[12px] font-bold capitalize">{selectedStage.setup_difficulty}</p>
-                         </div>
-                         <div className="p-2.5 bg-white/5 rounded-lg border border-white/5">
-                            <p className="text-[10px] text-white/30 mb-1">Lock-in</p>
-                            <p className="text-[12px] font-bold capitalize">{selectedStage.lock_in_risk}</p>
-                         </div>
-                      </div>
-                   </section>
-                </div>
-             </div>
-           ) : (
-             <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-white/20">
-                <svg viewBox="0 0 24 24" className="w-12 h-12 mb-4 opacity-10 fill-current"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
-                <p className="text-[13px] font-medium">Select a stage on the canvas<br/>to view properties</p>
-             </div>
-           )}
-        </aside>
+        {/* Footer */}
+        <div className="mt-12 pb-8 text-center">
+          <a
+            href="/"
+            className="text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors"
+          >
+            Generate another roadmap
+          </a>
+        </div>
       </div>
     </div>
   )
@@ -310,5 +349,3 @@ const VARIANTS: { value: Variant; label: string }[] = [
   { value: "cheapest", label: "Cheapest" },
   { value: "open-source", label: "Open Source" },
 ]
-
-const BUDGET_STEPS = [0, 50, 100, 200, 500, 1000]

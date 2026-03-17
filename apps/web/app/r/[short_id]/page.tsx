@@ -17,6 +17,8 @@ export default function RoadmapPage() {
     "generating"
   )
   const [roadmap, setRoadmap] = useState<RoadmapResult | null>(null)
+  const [toolsMeta, setToolsMeta] = useState<Record<string, { logo_url: string | null; website_url: string | null; short_description: string | null }>>({})
+
 
   useEffect(() => {
     let stopped = false
@@ -40,6 +42,7 @@ export default function RoadmapPage() {
 
         if (data.status === "complete" && data.roadmap) {
           setRoadmap(data.roadmap)
+          setToolsMeta(data.tools_meta ?? {})
           setStatus("complete")
           return
         }
@@ -167,5 +170,5 @@ export default function RoadmapPage() {
 
   if (!roadmap) return <LoadingState />
 
-  return <RoadmapView roadmap={roadmap} shortId={shortId} />
+  return <RoadmapView roadmap={roadmap} shortId={shortId} toolsMeta={toolsMeta} />
 }

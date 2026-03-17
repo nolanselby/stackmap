@@ -110,7 +110,6 @@ ai-tool-roadmapper/
 │   └── scoring/       Tool scoring / ranking algorithms
 └── services/
     ├── enrich/        Enrichment: classifies and deduplicates tools
-    ├── ingest/        Ingestion: GitHub, Product Hunt, directory scrapers
     └── planner/       Planner: retrieves tools and generates roadmaps
 ```
 
@@ -197,7 +196,7 @@ The AI tool database is the core of this project. We actively welcome tool submi
 
 1. **Check first** — search the existing database to make sure the tool is not already listed.
 2. **Open a Tool Submission issue** using the [tool submission template](.github/ISSUE_TEMPLATE/tool_submission.md). A maintainer will review it.
-3. **For bulk additions or data improvements**, read [docs/adding-tools.md](docs/adding-tools.md) for the full data format and ingestion pipeline overview.
+3. **For bulk additions or data improvements**, add entries to the seed SQL file and run `node scripts/apply-seed.mjs`.
 
 ---
 

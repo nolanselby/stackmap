@@ -8,6 +8,7 @@ export const WorkflowStageSchema = z.object({
   cheapest_tool: ToolRefSchema.nullable(),
   opensource_tool: ToolRefSchema.nullable(),
   why_chosen: z.string(),
+  action_steps: z.array(z.string()).max(4).optional().default([]),
   monthly_cost_estimate: z.number().nonnegative(),
   setup_difficulty: z.enum(["low", "medium", "high"]),
   lock_in_risk: z.enum(["low", "medium", "high"]),

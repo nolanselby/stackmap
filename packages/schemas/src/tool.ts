@@ -25,7 +25,7 @@ export const ToolRefSchema = z.object({
 export const StagingToolSchema = z.object({
   id: z.string().uuid(),
   raw_data: z.record(z.unknown()),
-  source: z.enum(["product_hunt", "github", "futurepedia", "taaft"]),
+  source: z.enum(["manual", "import"]),
   source_id: z.string().nullable(),
   status: z.enum(["pending", "enriching", "enriched", "failed", "duplicate"]),
   error_message: z.string().nullable(),

@@ -250,45 +250,6 @@
 .animate-pulse-ring { animation: pulse-ring 2s ease-out infinite; }
 
 /* ──────────────────────────────────────────────────
-   React Flow overrides
-────────────────────────────────────────────────── */
-
-.react-flow__controls {
-  border: 1px solid rgb(var(--line)) !important;
-  border-radius: 10px !important;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(var(--shadow-color), 0.06), 0 4px 12px rgba(var(--shadow-color), 0.04) !important;
-  background: rgb(var(--paper-3)) !important;
-}
-
-.react-flow__controls-button {
-  background: transparent !important;
-  border-bottom: 1px solid rgb(var(--line)) !important;
-  color: rgb(var(--muted)) !important;
-  transition: background 0.15s, color 0.15s;
-}
-
-.react-flow__controls-button:hover {
-  background: rgba(var(--accent), 0.05) !important;
-  color: rgb(var(--accent)) !important;
-}
-
-.react-flow__controls-button:last-child {
-  border-bottom: none !important;
-}
-
-.react-flow__minimap {
-  border: 1px solid rgb(var(--line)) !important;
-  border-radius: 10px !important;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(var(--shadow-color), 0.06), 0 4px 12px rgba(var(--shadow-color), 0.04) !important;
-}
-
-.react-flow__edge-path {
-  transition: stroke-opacity 0.2s;
-}
-
-/* ──────────────────────────────────────────────────
    Range input (budget slider)
 ────────────────────────────────────────────────── */
 

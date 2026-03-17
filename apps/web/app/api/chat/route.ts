@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
   try {
     const result = streamText({
-      model: anthropic("claude-3-5-sonnet-20241022"),
+      model: anthropic("claude-sonnet-4-20250514"),
       system: CHAT_SYSTEM_PROMPT,
       messages: cappedMessages,
       tools: {

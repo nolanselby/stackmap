@@ -101,16 +101,12 @@ export const enrichProcessToolFn = inngest.createFunction(
     // 6. Compute scores
     const launchDate = (raw.launch_date as string | null) ?? null
     const githubStars = (raw.github_stars as number) ?? 0
-    const phVotes = (raw.producthunt_votes as number) ?? 0
     const githubLastCommit = (raw.github_last_commit as string | null) ?? null
     const isOpenSource = (raw.open_source as boolean) ?? false
-    const sourceCount =
-      (staging.source === "product_hunt" ? 1 : 0) +
-      (staging.source === "github" ? 1 : 0) +
-      (staging.source === "futurepedia" || staging.source === "taaft" ? 1 : 0)
+    const sourceCount = 1
 
     const fScore = freshnessScore(launchDate)
-    const pScore = popularityScore({ githubStars, phVotes, sourceCount })
+    const pScore = popularityScore({ githubStars, phVotes: 0, sourceCount })
     const mScore = maintenanceScore(githubLastCommit, isOpenSource)
     const sComponent = sourceComponent(sourceCount)
     const tScore = trustScore({
@@ -173,7 +169,6 @@ export const enrichProcessToolFn = inngest.createFunction(
           tool_id: tool.id,
           github_stars: githubStars,
           github_last_commit: githubLastCommit,
-          producthunt_votes: phVotes,
           source_count: sourceCount,
           freshness_score: fScore,
           popularity_score: pScore,

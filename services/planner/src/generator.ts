@@ -60,7 +60,7 @@ export async function generateRoadmap(params: {
   })
 
   const response = await client.messages.create({
-    model: "claude-3-5-sonnet-20241022",
+    model: "claude-sonnet-4-20250514",
     max_tokens: 3000,
     messages: [{ role: "user", content: prompt + "\n\nPlease respond in strict JSON format according to the schema description." }],
   })

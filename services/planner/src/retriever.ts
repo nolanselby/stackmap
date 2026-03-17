@@ -143,6 +143,13 @@ export function applyPreferenceFilter(
   return copy
 }
 
+function extractMeta<T>(meta: unknown, key: string): T[] {
+  if (!meta) return []
+  const row = Array.isArray(meta) ? meta[0] : meta
+  const val = (row as Record<string, unknown>)?.[key]
+  return Array.isArray(val) ? (val as T[]) : []
+}
+
 export function groupByWorkflowStage(
   tools: ToolCandidate[],
   modules: WorkflowModuleRef[]
@@ -158,15 +165,17 @@ export function groupByWorkflowStage(
     }
 
     if (targetCategories.size > 0) {
-      result[module.module_name] = tools.filter((tool) =>
+      const matched = tools.filter((tool) =>
         tool.categories.some((cat) => targetCategories.has(cat))
       )
+      result[module.module_name] =
+        matched.length > 0 ? matched : tools.slice(0, 8)
     } else {
       // Fallback: word-overlap between module name tokens and tool text
       const moduleWords = module.module_name
         .split("_")
         .filter((w) => w.length > 3)
-      result[module.module_name] = tools.filter((tool) => {
+      const matched = tools.filter((tool) => {
         const text = [
           ...tool.categories,
           ...tool.use_cases,
@@ -176,6 +185,8 @@ export function groupByWorkflowStage(
           .toLowerCase()
         return moduleWords.some((word) => text.includes(word))
       })
+      result[module.module_name] =
+        matched.length > 0 ? matched : tools.slice(0, 8)
     }
   }
 
@@ -213,22 +224,22 @@ async function retrieveByCategory(
 
   if (error) throw new Error(`DB fetch failed: ${error.message}`)
 
-  const candidates: ToolCandidate[] = (allTools ?? [])
-    .map((t) => ({
+  const candidates: ToolCandidate[] = (allTools ?? []).map((t) => {
+    const pricing = Array.isArray(t.tool_pricing) ? t.tool_pricing[0] : t.tool_pricing
+    const categories = extractMeta<string>(t.tool_metadata, "categories")
+    return {
       tool_id: t.id,
       name: t.name,
       short_description: t.short_description,
       starting_price_monthly:
-        (t.tool_pricing as { starting_price_monthly: number | null }[] | null)?.[0]
-          ?.starting_price_monthly ?? null,
+        (pricing as { starting_price_monthly: number | null })?.starting_price_monthly ?? null,
       free_tier:
-        (t.tool_pricing as { free_tier: boolean | null }[] | null)?.[0]?.free_tier ?? null,
+        (pricing as { free_tier: boolean | null })?.free_tier ?? null,
       open_source: t.open_source ?? false,
-      categories:
-        (t.tool_metadata as { categories: string[] | null }[] | null)?.[0]?.categories ?? [],
-      use_cases:
-        (t.tool_metadata as { use_cases: string[] | null }[] | null)?.[0]?.use_cases ?? [],
-    }))
+      categories,
+      use_cases: extractMeta<string>(t.tool_metadata, "use_cases"),
+    }
+  })
     // Keep only tools from relevant categories (or tools with no category data)
     .filter((t) => {
       if (t.categories.length === 0) return true
@@ -257,7 +268,15 @@ export async function retrieveCandidates(
     .eq("business_type", businessType)
     .order("typical_order")
 
-  const resolvedModules: WorkflowModuleRef[] = modules ?? []
+  let resolvedModules: WorkflowModuleRef[] = modules ?? []
+
+  if (resolvedModules.length === 0) {
+    resolvedModules = [
+      { module_name: "getting_started", required_capabilities: ["llm_chat"], typical_order: 1, stage: "setup" },
+      { module_name: "build_core", required_capabilities: ["ai_text_generation", "workflow_automation"], typical_order: 2, stage: "build" },
+      { module_name: "launch", required_capabilities: ["analytics_dashboard"], typical_order: 3, stage: "launch" },
+    ]
+  }
 
   // ── Try vector search if key looks valid ──────────────────────────────────
   const keyLooksValid =
@@ -294,21 +313,22 @@ export async function retrieveCandidates(
           .in("id", toolIds)
           .eq("status_active", true)
 
-        const candidates: ToolCandidate[] = (toolsWithMeta ?? []).map((t) => ({
-          tool_id: t.id,
-          name: t.name,
-          short_description: t.short_description,
-          starting_price_monthly:
-            (t.tool_pricing as { starting_price_monthly: number | null }[] | null)?.[0]
-              ?.starting_price_monthly ?? null,
-          free_tier:
-            (t.tool_pricing as { free_tier: boolean | null }[] | null)?.[0]?.free_tier ?? null,
-          open_source: t.open_source ?? false,
-          categories:
-            (t.tool_metadata as { categories: string[] | null }[] | null)?.[0]?.categories ?? [],
-          use_cases:
-            (t.tool_metadata as { use_cases: string[] | null }[] | null)?.[0]?.use_cases ?? [],
-        }))
+        const candidates: ToolCandidate[] = (toolsWithMeta ?? []).map((t) => {
+          const pricing = Array.isArray(t.tool_pricing) ? t.tool_pricing[0] : t.tool_pricing
+          const categories = extractMeta<string>(t.tool_metadata, "categories")
+          return {
+            tool_id: t.id,
+            name: t.name,
+            short_description: t.short_description,
+            starting_price_monthly:
+              (pricing as { starting_price_monthly: number | null })?.starting_price_monthly ?? null,
+            free_tier:
+              (pricing as { free_tier: boolean | null })?.free_tier ?? null,
+            open_source: t.open_source ?? false,
+            categories,
+            use_cases: extractMeta<string>(t.tool_metadata, "use_cases"),
+          }
+        })
 
         const budgetFiltered = applyBudgetFilter(candidates, budgetMonthly)
         const preferenceOrdered = applyPreferenceFilter(budgetFiltered, preference)
