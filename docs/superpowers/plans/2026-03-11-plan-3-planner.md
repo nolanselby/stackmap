@@ -4,9 +4,9 @@
 
 **Goal:** Build the recommendation engine (business type detection, pgvector retrieval, LLM ranking) and all API routes (`POST /api/chat`, `POST /api/roadmap/generate`, `GET /api/roadmap/[short_id]`, exports), plus the Inngest planner function and rate-limiting middleware.
 
-**Architecture:** Planner logic in `services/planner/` as pure TypeScript modules imported by the Inngest `planner-generate-roadmap` function. API routes in `apps/web/app/api/`. The chat route streams via Vercel AI SDK. The roadmap generate route is sync (returns `short_id` immediately) while Inngest runs generation async. Polling via `GET /api/roadmap/[short_id]`.
+**Architecture:** Planner logic in `services/planner/` as pure TypeScript modules imported by the Inngest `planner-generate-roadmap` function. API routes in `apps/web/app/api/`. The chat route streams via Hosting Provider AI SDK. The roadmap generate route is sync (returns `short_id` immediately) while Inngest runs generation async. Polling via `GET /api/roadmap/[short_id]`.
 
-**Tech Stack:** Vercel AI SDK, OpenAI SDK, pgvector, Inngest, nanoid, Zod, Vitest
+**Tech Stack:** Hosting Provider AI SDK, OpenAI SDK, pgvector, Inngest, nanoid, Zod, Vitest
 
 **Prerequisite:** Plans 1 and 2 complete. Supabase migrations applied. At least some tools in `tools` table with `status_active = true`.
 
@@ -991,7 +991,7 @@ export async function POST(request: Request) {
 EOF
 ```
 
-**Note:** The `inputs_complete` data signal is best implemented using Vercel AI SDK tools. Update the chat route to use a tool call approach: define a tool called `submit_inputs` that the model calls when it has all required information. The frontend detects this tool call via `useChat`'s `toolInvocations`. Update the system prompt in `packages/prompts/src/chat-system-prompt.ts` to instruct the model to call `submit_inputs` when ready.
+**Note:** The `inputs_complete` data signal is best implemented using Hosting Provider AI SDK tools. Update the chat route to use a tool call approach: define a tool called `submit_inputs` that the model calls when it has all required information. The frontend detects this tool call via `useChat`'s `toolInvocations`. Update the system prompt in `packages/prompts/src/chat-system-prompt.ts` to instruct the model to call `submit_inputs` when ready.
 
 - [ ] **Step 2: Update system prompt to use tool approach**
 
@@ -1088,7 +1088,7 @@ EOF
 ```bash
 cd /Users/nolanselby/ai-tool-roadmapper
 git add apps/web/app/api/chat/route.ts packages/prompts/
-git commit -m "feat: add /api/chat route with Vercel AI SDK streaming and submit_inputs tool"
+git commit -m "feat: add /api/chat route with Hosting Provider AI SDK streaming and submit_inputs tool"
 ```
 
 ---

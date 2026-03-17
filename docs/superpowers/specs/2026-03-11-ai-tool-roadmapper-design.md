@@ -36,7 +36,7 @@ ai-tool-roadmapper/
     scoring/              # Deterministic scoring logic
     prompts/              # LLM prompt templates (system prompts, extraction prompts)
   .github/
-    workflows/            # CI: lint, typecheck, test, Vercel preview deploy
+    workflows/            # CI: lint, typecheck, test, Hosting Provider preview deploy
 ```
 
 ---
@@ -45,15 +45,15 @@ ai-tool-roadmapper/
 
 | Layer | Choice | Reason |
 |---|---|---|
-| Frontend | Next.js 14 (App Router), TypeScript, Tailwind, shadcn/ui | Zero-config Vercel deploys, App Router for streaming |
+| Frontend | Next.js 14 (App Router), TypeScript, Tailwind, shadcn/ui | Zero-config Hosting Provider deploys, App Router for streaming |
 | Graph UI | React Flow v12 (MIT license) | Purpose-built interactive node graph |
 | Database | Supabase (Postgres + pgvector) | pgvector for embeddings, pg_cron for scheduled jobs, generous free tier |
 | ORM | Drizzle ORM | Type-safe, lightweight, plays well with Supabase |
 | Background jobs | Inngest | Durable execution, retries, fan-out — purpose-built for pipelines |
 | Embeddings | OpenAI `text-embedding-3-small` | Fast, cheap, 1536 dimensions |
 | LLM | OpenAI `gpt-4o` | Structured JSON output for enrichment and planner ranking |
-| Streaming | Vercel AI SDK (`useChat`, `streamText`) | Handles chat streaming and roadmap generation streaming |
-| Hosting | Vercel (web), Inngest cloud (workers) | Fully managed, no ops overhead |
+| Streaming | Hosting Provider AI SDK (`useChat`, `streamText`) | Handles chat streaming and roadmap generation streaming |
+| Hosting | Hosting Provider (web), Inngest cloud (workers) | Fully managed, no ops overhead |
 | Theme | Orange primary brand color | Applied throughout: buttons, accents, graph nodes, edges |
 | Test framework | Vitest + Testing Library | Fast, native ESM, good Next.js support |
 
@@ -204,14 +204,14 @@ created_at timestamptz DEFAULT now()
 All routes live in `apps/web/app/api/`.
 
 ### `POST /api/chat`
-Handles the conversational input flow. Streams responses back via Vercel AI SDK (`streamText`).
+Handles the conversational input flow. Streams responses back via Hosting Provider AI SDK (`streamText`).
 
 **Request:**
 ```typescript
 { messages: { role: "user" | "assistant", content: string }[] }
 ```
 
-**Response:** Server-Sent Events stream (Vercel AI SDK format)
+**Response:** Server-Sent Events stream (Hosting Provider AI SDK format)
 
 **Rate limiting:** IP-based rate limit enforced in Next.js middleware: max 20 requests per IP per minute. Exceeding returns HTTP 429. Max 6 messages per conversation session (enforced server-side by checking `messages.length`); if exceeded, the bot responds with a "let me generate your roadmap now" message and forces generation.
 
@@ -225,7 +225,7 @@ Handles the conversational input flow. Streams responses back via Vercel AI SDK 
 The chat bot is driven by `gpt-4o` with a system prompt from `packages/prompts/chat-system-prompt.ts`. The system prompt instructs the model to:
 1. Acknowledge the idea and ask about the target customer + budget (turn 2)
 2. Ask about tech level + preference: best overall, cheapest viable, or open-source first (turn 3)
-3. Once all inputs are collected, use the Vercel AI SDK **data stream channel** to emit a structured data message alongside the final text response. This is done via `streamText`'s `onFinish` callback writing to `DataStreamWriter`:
+3. Once all inputs are collected, use the Hosting Provider AI SDK **data stream channel** to emit a structured data message alongside the final text response. This is done via `streamText`'s `onFinish` callback writing to `DataStreamWriter`:
    ```typescript
    // Server-side, inside the streamText handler:
    dataStream.writeData({
@@ -442,7 +442,7 @@ The three plan variants (Best Overall / Cheapest / Open Source) are derived clie
 - Full-screen chat interface — the page IS the chat
 - Orange brand theme, minimal chrome
 - First bot message: `"Tell me what you want to build — describe your startup idea in a sentence or two."`
-- Uses Vercel AI SDK `useChat` hook for streaming
+- Uses Hosting Provider AI SDK `useChat` hook for streaming
 - When `inputs_complete` message is received: frontend calls `POST /api/roadmap/generate`, receives `short_id`, navigates to `/r/[short_id]`
 
 ### Loading Page (`/r/[short_id]` while `status === 'generating'`)
@@ -579,12 +579,12 @@ The full seed data for all 12 business types is defined in `scripts/seed-workflo
 
 ### `.github/workflows/deploy.yml`
 - Triggers: push to `main`
-- Steps: Vercel production deploy via `vercel --prod` (Vercel GitHub integration handles preview deploys automatically)
+- Steps: Hosting Provider production deploy via `hosting-provider --prod` (Hosting Provider GitHub integration handles preview deploys automatically)
 
 ### Inngest functions
 - **Authoritative location:** `apps/web/inngest/` — co-located with the Next.js app and registered via the Inngest Next.js serve handler at `apps/web/app/api/inngest/route.ts`
 - The `services/ingest/`, `services/enrich/`, and `services/planner/` directories in the repo structure contain the **business logic modules** imported by the Inngest functions in `apps/web/inngest/`. They are not separate deployable services.
-- Deployed automatically when Vercel deploys `apps/web`
+- Deployed automatically when Hosting Provider deploys `apps/web`
 
 ---
 

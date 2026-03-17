@@ -17,7 +17,7 @@ There are 6 phases in order:
 2. **API Keys** — gather OpenAI, Product Hunt, GitHub tokens
 3. **Inngest** — create app and get signing/event keys
 4. **Local env wiring** — update `.env.local` with real values, verify app starts
-5. **Vercel deploy** — link project, add env vars, push to production
+5. **Hosting Provider deploy** — link project, add env vars, push to production
 6. **Seed + smoke test** — run bulk seed, trigger enrichment, test end-to-end
 
 ---
@@ -29,7 +29,7 @@ There are 6 phases in order:
 - [ ] Go to https://supabase.com/dashboard and click **New project**
 - [ ] Name it `ai-tool-roadmapper`
 - [ ] Choose the **Free** tier (or Pro if you expect immediate traffic)
-- [ ] Pick a region close to your Vercel deployment (US East is a safe default)
+- [ ] Pick a region close to your Hosting Provider deployment (US East is a safe default)
 - [ ] Set a strong database password — save it somewhere safe
 - [ ] Wait for project to finish provisioning (~60 seconds)
 
@@ -132,8 +132,8 @@ From the app dashboard:
 
 ### Task 3.3: Note your Inngest sync URL
 
-After deploying to Vercel (Phase 5), you'll need to register your app with Inngest at:
-`https://your-vercel-domain.vercel.app/api/inngest`
+After deploying to Hosting Provider (Phase 5), you'll need to register your app with Inngest at:
+`https://your-hosting-provider-domain.hosting-provider.app/api/inngest`
 
 This is done in Phase 5, Step 5.4.
 
@@ -179,35 +179,35 @@ pnpm dev
 
 ---
 
-## Phase 5: Vercel Deployment
+## Phase 5: Hosting Provider Deployment
 
-### Task 5.1: Install Vercel CLI and link project
+### Task 5.1: Install Hosting Provider CLI and link project
 
 ```bash
-npm i -g vercel
+npm i -g hosting-provider
 cd /Users/nolanselby/ai-tool-roadmapper/apps/web
-vercel link
+hosting-provider link
 ```
 
 - [ ] Follow prompts: link to existing project or create new → `ai-tool-roadmapper`
 - [ ] Note the **Project ID** and **Org ID** shown after linking (needed for GitHub Actions secrets)
 
-### Task 5.2: Add environment variables to Vercel
+### Task 5.2: Add environment variables to Hosting Provider
 
 ```bash
 # From apps/web directory — add each var to production
-vercel env add OPENAI_API_KEY production
-vercel env add SUPABASE_URL production
-vercel env add SUPABASE_SERVICE_ROLE_KEY production
-vercel env add NEXT_PUBLIC_SUPABASE_URL production
-vercel env add NEXT_PUBLIC_SUPABASE_ANON_KEY production
-vercel env add INNGEST_SIGNING_KEY production
-vercel env add INNGEST_EVENT_KEY production
-vercel env add PRODUCT_HUNT_API_TOKEN production
-vercel env add GITHUB_TOKEN production
+hosting-provider env add OPENAI_API_KEY production
+hosting-provider env add SUPABASE_URL production
+hosting-provider env add SUPABASE_SERVICE_ROLE_KEY production
+hosting-provider env add NEXT_PUBLIC_SUPABASE_URL production
+hosting-provider env add NEXT_PUBLIC_SUPABASE_ANON_KEY production
+hosting-provider env add INNGEST_SIGNING_KEY production
+hosting-provider env add INNGEST_EVENT_KEY production
+hosting-provider env add PRODUCT_HUNT_API_TOKEN production
+hosting-provider env add GITHUB_TOKEN production
 ```
 
-> Alternatively: add them all at once via the Vercel Dashboard → Project → Settings → Environment Variables.
+> Alternatively: add them all at once via the Hosting Provider Dashboard → Project → Settings → Environment Variables.
 
 - [ ] Also add to **Preview** environment if you want PR previews to work.
 
@@ -215,16 +215,16 @@ vercel env add GITHUB_TOKEN production
 
 ```bash
 cd /Users/nolanselby/ai-tool-roadmapper/apps/web
-vercel --prod
+hosting-provider --prod
 ```
 
-- [ ] Deployment completes — note your production URL (e.g. `ai-tool-roadmapper.vercel.app`)
+- [ ] Deployment completes — note your production URL (e.g. `ai-tool-roadmapper.hosting-provider.app`)
 - [ ] Visit the URL — chat page loads correctly
 
 ### Task 5.4: Register app with Inngest
 
 - [ ] Go to https://app.inngest.com → your app → **Sync**
-- [ ] Enter your sync URL: `https://ai-tool-roadmapper.vercel.app/api/inngest`
+- [ ] Enter your sync URL: `https://ai-tool-roadmapper.hosting-provider.app/api/inngest`
 - [ ] Click **Sync** — Inngest will ping the endpoint and discover all your functions
 - [ ] Verify all 6 functions appear in the Inngest dashboard:
   - `ingest-product-hunt`
@@ -238,9 +238,9 @@ vercel --prod
 
 In your GitHub repo → Settings → Secrets and variables → Actions, add:
 
-- [ ] `VERCEL_TOKEN` — from https://vercel.com/account/tokens → Create Token
-- [ ] `VERCEL_ORG_ID` — from `.vercel/project.json` after `vercel link` (field: `orgId`)
-- [ ] `VERCEL_PROJECT_ID` — from `.vercel/project.json` (field: `projectId`)
+- [ ] `HOSTING_TOKEN` — from https://hosting-provider.com/account/tokens → Create Token
+- [ ] `HOSTING_ORG_ID` — from `.hosting-provider/project.json` after `hosting-provider link` (field: `orgId`)
+- [ ] `HOSTING_PROJECT_ID` — from `.hosting-provider/project.json` (field: `projectId`)
 
 > This enables the auto-deploy workflow (`.github/workflows/deploy.yml`) to deploy on every push to `main`.
 
@@ -303,7 +303,7 @@ SELECT count(*) FROM tools WHERE status_active = true;
 
 Once at least 200 tools are enriched:
 
-- [ ] Go to `https://ai-tool-roadmapper.vercel.app`
+- [ ] Go to `https://ai-tool-roadmapper.hosting-provider.app`
 - [ ] Describe a startup idea (e.g. "An AI SDR that automatically finds and emails leads for B2B SaaS companies")
 - [ ] Answer the 3–4 follow-up questions
 - [ ] The chat should call `submit_inputs` and redirect to `/r/[short_id]`
@@ -353,7 +353,7 @@ SELECT cron.schedule(
 
 ### Task 7.2: Custom domain (optional)
 
-- [ ] In Vercel → Project → Settings → Domains, add your custom domain
+- [ ] In Hosting Provider → Project → Settings → Domains, add your custom domain
 - [ ] Update the markdown export URL in `apps/web/app/api/roadmap/[short_id]/export/markdown/route.ts`:
   - Line 9: change `https://roadmapper.ai/r/${shortId}` to your actual domain
 
@@ -376,8 +376,8 @@ SELECT cron.schedule(
 [ ] Inngest app created, keys collected
 [ ] .env.local updated with real values
 [ ] App starts locally without errors
-[ ] Deployed to Vercel
-[ ] Inngest synced to Vercel URL
+[ ] Deployed to Hosting Provider
+[ ] Inngest synced to Hosting Provider URL
 [ ] GitHub Actions secrets added
 [ ] Bulk seed script run (~800 tools in staging_tools)
 [ ] Enrichment fan-out triggered

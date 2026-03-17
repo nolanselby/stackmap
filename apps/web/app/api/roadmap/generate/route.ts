@@ -4,7 +4,6 @@ import { RoadmapInputSchema } from "@roadmapper/schemas"
 import { detectBusinessType, retrieveCandidates, generateRoadmap } from "@roadmapper/planner"
 import { nanoid } from "nanoid"
 
-// Allow up to 60s for the planner to complete (Vercel Pro; ignored locally)
 export const maxDuration = 60
 
 const NANOID_LENGTH = 8

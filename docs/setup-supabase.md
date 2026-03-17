@@ -82,7 +82,7 @@ Copy the following values into `apps/web/.env.local`:
 | `SUPABASE_SERVICE_ROLE_KEY` | Settings → API → Project API keys → `service_role` (keep secret) |
 | `DATABASE_URL` | Settings → Database → Connection string → URI |
 
-> **Note on DATABASE_URL:** For serverless deployments (Vercel) use the **Transaction** pooler connection string to avoid exhausting connection limits. For local development the direct connection string is fine.
+> **Note on DATABASE_URL:** For serverless deployments use the **Transaction** pooler connection string to avoid exhausting connection limits. For local development the direct connection string is fine.
 
 ---
 
@@ -121,7 +121,7 @@ supabase stop
 Enable pgvector before running migrations (see Step 2).
 
 **`connection refused` or timeout on DATABASE_URL**
-Make sure you are using the correct connection string. For Vercel/serverless, use the Transaction pooler URL (port 6543), not the direct connection (port 5432).
+Make sure you are using the correct connection string. For serverless, use the Transaction pooler URL (port 6543), not the direct connection (port 5432).
 
 **RLS blocking reads in your API routes**
 Ensure server-side Supabase calls use the client initialised with `SUPABASE_SERVICE_ROLE_KEY`, not the anon key.

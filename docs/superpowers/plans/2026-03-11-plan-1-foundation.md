@@ -1719,13 +1719,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
+      - name: Deploy to Hosting Provider
+        uses: amondnet/hosting-provider-action@v25
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: "--prod"
+          hosting-provider-token: ${{ secrets.HOSTING_TOKEN }}
+          hosting-provider-org-id: ${{ secrets.HOSTING_ORG_ID }}
+          hosting-provider-project-id: ${{ secrets.HOSTING_PROJECT_ID }}
+          hosting-provider-args: "--prod"
           working-directory: apps/web
 EOF
 ```
@@ -1735,7 +1735,7 @@ EOF
 ```bash
 cd /Users/nolanselby/ai-tool-roadmapper
 git add .github/
-git commit -m "feat: add GitHub Actions CI and Vercel deploy workflows"
+git commit -m "feat: add GitHub Actions CI and Hosting Provider deploy workflows"
 ```
 
 ---

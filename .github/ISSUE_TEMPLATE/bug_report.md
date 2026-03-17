@@ -33,7 +33,7 @@ A clear and concise description of what actually happened. Include any error mes
 | Browser | e.g. Chrome 124, Firefox 125, Safari 17 |
 | Node.js version | e.g. 20.11.0 |
 | pnpm version | e.g. 10.4.0 |
-| Deployment | Local dev / Vercel preview / Production |
+| Deployment | Local dev / Staging / Production |
 
 ## Screenshots
 

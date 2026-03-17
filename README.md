@@ -41,12 +41,12 @@ AI Tool Roadmapper is an open-source tool that helps founders and developers dis
 |---|---|
 | **Frontend** | Next.js 14, React 18, TypeScript, Tailwind CSS |
 | **Graph Visualization** | React Flow (`@xyflow/react`) |
-| **AI / LLM** | Anthropic Claude via Vercel AI SDK |
+| **AI / LLM** | Anthropic Claude via AI SDK |
 | **Database** | Supabase (PostgreSQL + pgvector) |
 | **ORM** | Drizzle ORM |
 | **Background Jobs** | Inngest |
 | **Monorepo** | Turborepo + pnpm workspaces |
-| **Deployment** | Vercel (web), Supabase (DB) |
+| **Deployment** | Supabase (DB) |
 
 ### Monorepo Services
 
@@ -192,6 +192,5 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 - [Anthropic](https://anthropic.com) for Claude and the AI SDK
 - [Supabase](https://supabase.com) for the database and pgvector support
-- [Vercel](https://vercel.com) for Next.js and deployment infrastructure
 - [Inngest](https://inngest.com) for background job orchestration
 - [React Flow](https://reactflow.dev) for the interactive graph visualization
