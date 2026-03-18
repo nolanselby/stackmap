@@ -10,6 +10,7 @@ export interface ToolCandidate {
   open_source: boolean
   categories: string[]
   use_cases: string[]
+  recommendation_weight: number
 }
 
 interface WorkflowModuleRef {
@@ -132,13 +133,21 @@ export function applyPreferenceFilter(
 ): ToolCandidate[] {
   const copy = [...tools]
   if (preference === "open-source") {
-    copy.sort((a, b) => Number(b.open_source) - Number(a.open_source))
+    copy.sort((a, b) => {
+      const osDiff = Number(b.open_source) - Number(a.open_source)
+      if (osDiff !== 0) return osDiff
+      return b.recommendation_weight - a.recommendation_weight
+    })
   } else if (preference === "cheapest") {
     copy.sort((a, b) => {
       const aPrice = a.free_tier ? 0 : (a.starting_price_monthly ?? 9999)
       const bPrice = b.free_tier ? 0 : (b.starting_price_monthly ?? 9999)
-      return aPrice - bPrice
+      const priceDiff = aPrice - bPrice
+      if (priceDiff !== 0) return priceDiff
+      return b.recommendation_weight - a.recommendation_weight
     })
+  } else {
+    copy.sort((a, b) => b.recommendation_weight - a.recommendation_weight)
   }
   return copy
 }
@@ -217,10 +226,12 @@ async function retrieveByCategory(
       name,
       short_description,
       open_source,
+      recommendation_weight,
       tool_metadata (categories, use_cases),
       tool_pricing (starting_price_monthly, free_tier)
     `)
     .eq("status_active", true)
+    .order("recommendation_weight", { ascending: false })
 
   if (error) throw new Error(`DB fetch failed: ${error.message}`)
 
@@ -238,9 +249,9 @@ async function retrieveByCategory(
       open_source: t.open_source ?? false,
       categories,
       use_cases: extractMeta<string>(t.tool_metadata, "use_cases"),
+      recommendation_weight: Number(t.recommendation_weight) || 0.5,
     }
   })
-    // Keep only tools from relevant categories (or tools with no category data)
     .filter((t) => {
       if (t.categories.length === 0) return true
       return t.categories.some((c) => relevantCategories.includes(c))
@@ -306,7 +317,7 @@ export async function retrieveCandidates(
         const { data: toolsWithMeta } = await db
           .from("tools")
           .select(`
-            id, name, short_description, open_source,
+            id, name, short_description, open_source, recommendation_weight,
             tool_metadata (categories, use_cases),
             tool_pricing (starting_price_monthly, free_tier)
           `)
@@ -327,6 +338,7 @@ export async function retrieveCandidates(
             open_source: t.open_source ?? false,
             categories,
             use_cases: extractMeta<string>(t.tool_metadata, "use_cases"),
+            recommendation_weight: Number(t.recommendation_weight) || 0.5,
           }
         })
 

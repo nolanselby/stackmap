@@ -54,6 +54,7 @@ export async function generateRoadmap(params: {
           monthly_cost: t.starting_price_monthly,
           free_tier: t.free_tier ?? false,
           open_source: t.open_source,
+          recommendation_weight: t.recommendation_weight,
         })),
       ])
     ),

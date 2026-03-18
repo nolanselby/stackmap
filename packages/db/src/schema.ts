@@ -40,6 +40,7 @@ export const tools = pgTable(
     last_verified_at: timestamp("last_verified_at", { withTimezone: true }),
     status_active: boolean("status_active").default(false),
     embedding: vector("embedding"),
+    recommendation_weight: numeric("recommendation_weight", { precision: 3, scale: 2 }).notNull().default("0.50"),
     created_at: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow(),
   },

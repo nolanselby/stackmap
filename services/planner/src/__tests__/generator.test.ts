@@ -9,6 +9,7 @@ const SAMPLE_RESULT = {
     {
       stage_name: "Lead Sourcing",
       stage_order: 1,
+      category: "Planning & Research",
       best_overall_tool: { tool_id: "00000000-0000-0000-0000-000000000001", name: "Apollo", why: "Best coverage" },
       cheapest_tool: { tool_id: "00000000-0000-0000-0000-000000000004", name: "Hunter.io", why: "Lower cost" },
       opensource_tool: null,
@@ -22,6 +23,7 @@ const SAMPLE_RESULT = {
     {
       stage_name: "Email Sequencing",
       stage_order: 2,
+      category: "Build & Connect",
       best_overall_tool: { tool_id: "00000000-0000-0000-0000-000000000002", name: "Instantly", why: "Great deliverability" },
       cheapest_tool: null,
       opensource_tool: { tool_id: "00000000-0000-0000-0000-000000000005", name: "Mautic", why: "Self-hostable" },

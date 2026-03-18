@@ -3,7 +3,7 @@ import { anthropic } from "@ai-sdk/anthropic"
 import { CHAT_SYSTEM_PROMPT } from "@roadmapper/prompts"
 import { z } from "zod"
 
-const MAX_MESSAGES = 6
+const MAX_MESSAGES = 12
 
 const RequestSchema = z.object({
   messages: z.array(

@@ -1,5 +1,5 @@
 "use client"
-import { useState, useRef, type FormEvent, type KeyboardEvent } from "react"
+import { useState, useRef, useEffect, type FormEvent, type KeyboardEvent } from "react"
 import { cn } from "@/lib/utils"
 
 interface ChatInputProps {
@@ -12,6 +12,15 @@ export function ChatInput({ onSubmit, disabled, placeholder }: ChatInputProps) {
   const [value, setValue] = useState("")
   const [focused, setFocused] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const prevDisabledRef = useRef(disabled)
+
+  // Restore focus when the input becomes enabled again (e.g. AI finishes responding)
+  useEffect(() => {
+    if (prevDisabledRef.current && !disabled) {
+      textareaRef.current?.focus()
+    }
+    prevDisabledRef.current = disabled
+  }, [disabled])
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault()

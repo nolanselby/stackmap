@@ -2,6 +2,13 @@ import { NextResponse } from "next/server"
 import { createServerClient } from "@roadmapper/db"
 import type { RoadmapResult } from "@roadmapper/schemas"
 
+const CATEGORY_ORDER = [
+  "Planning & Research",
+  "Coding & Setup",
+  "Build & Connect",
+  "Launch & Grow",
+]
+
 function roadmapToMarkdown(roadmap: RoadmapResult, shortId: string): string {
   const lines: string[] = [
     `# AI Stack Roadmap: ${roadmap.business_type.replace(/_/g, " ").toUpperCase()}`,
@@ -13,26 +20,49 @@ function roadmapToMarkdown(roadmap: RoadmapResult, shortId: string): string {
     "",
     "---",
     "",
-    "## Workflow Stages",
-    "",
   ]
 
-  for (const stage of roadmap.workflow_stages.sort((a, b) => a.stage_order - b.stage_order)) {
-    lines.push(`### ${stage.stage_order}. ${stage.stage_name}`)
-    lines.push("")
-    lines.push(`**Best Tool:** ${stage.best_overall_tool.name} — $${stage.monthly_cost_estimate}/mo`)
-    lines.push(`**Why:** ${stage.why_chosen}`)
-    lines.push(`**Difficulty:** ${stage.setup_difficulty} | **Lock-in risk:** ${stage.lock_in_risk}`)
-    if (stage.cheapest_tool) {
-      lines.push(`**Cheaper alternative:** ${stage.cheapest_tool.name} — ${stage.cheapest_tool.why}`)
-    }
-    if (stage.opensource_tool) {
-      lines.push(`**Open-source option:** ${stage.opensource_tool.name} — ${stage.opensource_tool.why}`)
-    }
-    lines.push("")
+  const sorted = [...roadmap.workflow_stages].sort((a, b) => a.stage_order - b.stage_order)
+  const byCategory = new Map<string, typeof sorted>()
+  for (const stage of sorted) {
+    const cat = stage.category ?? "Build & Connect"
+    if (!byCategory.has(cat)) byCategory.set(cat, [])
+    byCategory.get(cat)!.push(stage)
   }
 
-  lines.push("## Build Sequence", "")
+  let phaseNum = 1
+  for (const cat of CATEGORY_ORDER) {
+    const stages = byCategory.get(cat)
+    if (!stages || stages.length === 0) continue
+
+    lines.push(`## Phase ${phaseNum}: ${cat}`, "")
+    phaseNum++
+
+    for (const stage of stages) {
+      lines.push(`### ${stage.stage_order}. ${stage.stage_name}`)
+      lines.push("")
+      lines.push(`**Best Tool:** ${stage.best_overall_tool.name} — $${stage.monthly_cost_estimate}/mo`)
+      lines.push(`**Why:** ${stage.why_chosen}`)
+      lines.push(`**Difficulty:** ${stage.setup_difficulty} | **Lock-in risk:** ${stage.lock_in_risk}`)
+
+      const actionSteps = (stage as any).action_steps as string[] | undefined
+      if (actionSteps && actionSteps.length > 0) {
+        lines.push("")
+        lines.push("**How to do this:**")
+        actionSteps.forEach((step, i) => lines.push(`${i + 1}. ${step}`))
+      }
+
+      if (stage.cheapest_tool) {
+        lines.push(`**Cheaper alternative:** ${stage.cheapest_tool.name} — ${stage.cheapest_tool.why}`)
+      }
+      if (stage.opensource_tool) {
+        lines.push(`**Open-source option:** ${stage.opensource_tool.name} — ${stage.opensource_tool.why}`)
+      }
+      lines.push("")
+    }
+  }
+
+  lines.push("## Week-by-Week Plan", "")
   for (const week of roadmap.build_sequence) {
     lines.push(`### Week ${week.week}: ${week.focus}`)
     lines.push(week.tools.map((t) => `- ${t}`).join("\n"))

@@ -4,6 +4,7 @@ import { ToolRefSchema } from "./tool"
 export const WorkflowStageSchema = z.object({
   stage_name: z.string(),
   stage_order: z.number().int().positive(),
+  category: z.string(),
   best_overall_tool: ToolRefSchema,
   cheapest_tool: ToolRefSchema.nullable(),
   opensource_tool: ToolRefSchema.nullable(),

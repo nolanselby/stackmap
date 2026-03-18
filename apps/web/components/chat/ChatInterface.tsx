@@ -6,11 +6,12 @@ import { ChatMessage } from "./ChatMessage"
 import { ChatInput } from "./ChatInput"
 
 const INITIAL_MESSAGE =
-  "Tell me what you want to build — describe your startup idea in a sentence or two. I'll ask a few quick questions, then generate your full AI tool stack and roadmap."
+  "Tell me what you want to build. Describe your idea in a sentence or two and I will ask a few questions, then generate your full tool stack and roadmap."
 
 export function ChatInterface() {
   const router = useRouter()
   const bottomRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
   const hasTriggeredRef = useRef(false)
   const [generationError, setGenerationError] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
@@ -81,9 +82,12 @@ export function ChatInterface() {
       })
   }, [messages, router])
 
-  // Scroll to bottom on new messages
+  // Scroll to bottom within the messages container on new messages
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+    const container = messagesContainerRef.current
+    if (container) {
+      container.scrollTop = container.scrollHeight
+    }
   }, [messages])
 
   function handleSubmit(text: string) {
@@ -106,7 +110,7 @@ export function ChatInterface() {
             Build your roadmap
           </h2>
           <p className="text-[12px] mt-0.5" style={{ color: "rgb(var(--muted))" }}>
-            Answer a few questions — we'll handle the rest.
+            Answer a few questions and we'll handle the rest.
           </p>
         </div>
         <div className="flex items-center gap-1.5">
@@ -136,7 +140,7 @@ export function ChatInterface() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0 scrollbar-thin">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3 min-h-0 scrollbar-thin">
         {messages.map((m, i) => (
           <ChatMessage
             key={m.id}
@@ -237,7 +241,7 @@ export function ChatInterface() {
         style={{ borderTop: "1px solid rgb(var(--line))" }}
       >
         {/* Magic Generate Button — shows when we have at least the idea */}
-        {messages.length >= 2 && !isGenerating && !isLoading && (
+        {messages.filter(m => m.role === "user").length >= 3 && !isGenerating && !isLoading && (
           <div className="flex justify-center animate-slide-up">
             <button
               onClick={() => {
